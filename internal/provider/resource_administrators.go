@@ -53,7 +53,7 @@ func (r *AdministratorsResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"role_name": schema.StringAttribute{
 				Required:    true,
-				Description: "Predefined administrative roles: `Master Administrator`, `Database Administrator`, `Setup Administrator`, `Account Manager`, `Application Manager`, `Delegated Administrator`",
+				Description: "Must match an existing administrative role. Predefined administrative roles are: `Master Administrator`, `Database Administrator`, `Setup Administrator`, `Account Manager`, `Application Manager`, `Delegated Administrator`",
 			},
 			"is_limited": schema.BoolAttribute{
 				Optional: true,

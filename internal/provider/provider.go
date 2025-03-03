@@ -109,13 +109,15 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 		resp.Diagnostics.AddError(
 			"Provider Configuration Error",
 			"Specify a username (AXWAYST_USERNAME environment variable).")
-		return
 	}
 
 	if password == "" {
 		resp.Diagnostics.AddError(
 			"Provider Configuration Error",
 			"Specify a password (AXWAYST_PASSWORD environment variable).")
+	}
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

@@ -28,7 +28,7 @@ resource "axwayst_administrators" "example-master" {
 ### Required
 
 - `id` (String) Administrator username i.e. `login_name`
-- `role_name` (String) Predefined administrative roles: `Master Administrator`, `Database Administrator`, `Setup Administrator`, `Account Manager`, `Application Manager`, `Delegated Administrator`
+- `role_name` (String) Must match an existing administrative role. Predefined administrative roles are: `Master Administrator`, `Database Administrator`, `Setup Administrator`, `Account Manager`, `Application Manager`, `Delegated Administrator`
 
 ### Optional
 
