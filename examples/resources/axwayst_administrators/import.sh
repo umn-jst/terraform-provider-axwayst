@@ -1,0 +1,1 @@
+terraform import axwayst_administrators.admin admin

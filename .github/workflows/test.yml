@@ -86,8 +86,8 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
-          AXWAYST_HOST: ${{ secrets.AXWYST_HOST }}
-          AXWAYST_USERNAME: ${{ secrets.AXWYST_USERNAME }}
-          AXWAYST_PASSWORD: ${{ secrets.AXWYST_PASSWORD }}
+          AXWAYST_HOST: ${{ secrets.AXWAYST_HOST }}
+          AXWAYST_USERNAME: ${{ secrets.AXWAYST_USERNAME }}
+          AXWAYST_PASSWORD: ${{ secrets.AXWAYST_PASSWORD }}
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
