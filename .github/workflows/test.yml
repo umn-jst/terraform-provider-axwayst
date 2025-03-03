@@ -19,7 +19,7 @@ jobs:
   # Ensure project builds before running testing matrix
   build:
     name: Build
-    runs-on: arc-runner-enterprise
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -56,7 +56,7 @@ jobs:
   test:
     name: Terraform Provider Acceptance Tests
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-enterprise
     timeout-minutes: 15
     strategy:
       fail-fast: false
