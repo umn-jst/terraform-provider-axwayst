@@ -26,8 +26,8 @@ type BusinessUnitsAPIModel struct {
 	HomeFolderModifyingAllowed bool              `json:"homeFolderModifyingAllowed"`
 	DMZ                        string            `json:"dmz"`
 	ManagedByCG                bool              `json:"managedByCG"`
-	EnabledIcapServers         []string          `json:"enabledIcapServers"`
-	AdditionalAttributes       map[string]string `json:"additionalAttributes"`
+	EnabledIcapServers         []string          `json:"enabledIcapServers,omitempty"`
+	AdditionalAttributes       map[string]string `json:"additionalAttributes,omitempty"`
 }
 
 type AdministratorsModel struct {

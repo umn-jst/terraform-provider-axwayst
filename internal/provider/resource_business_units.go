@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -80,6 +82,7 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 						[]attr.Value{},
 					),
 				),
+				Computed: true,
 			},
 			"additional_attributes": schema.MapAttribute{
 				Optional:    true,
@@ -280,34 +283,24 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	// var bodyData BusinessUnitsModel
+	var bodyData BusinessUnitsAPIModel
 
-	// bodyData.LoginName = data.LoginName.ValueString()
-	// bodyData.RoleName = data.RoleName.ValueString()
-	// bodyData.IsLimited = data.IsLimited.ValueBool()
-	// bodyData.LocalAuthentication = data.LocalAuthentication.ValueBool()
-	// bodyData.DualAuthentication = data.DualAuthentication.ValueBool()
-	// bodyData.Locked = data.Locked.ValueBool()
+	bodyData.Name = data.Name.ValueString()
+	bodyData.BaseFolder = data.BaseFolder.ValueString()
+	bodyData.Parent = data.Parent.ValueString()
+	bodyData.BusinessUnitHierarchy = data.BusinessUnitHierarchy.ValueString()
+	bodyData.BaseFolderModifyingAllowed = data.BaseFolderModifyingAllowed.ValueBool()
+	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
+	bodyData.DMZ = data.DMZ.ValueString()
+	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
+	// bodyData.EnabledIcapServers = data.
+	// bodyData.AdditionalAttributes = data.
 
 	// bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
 	// bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
 
 	// bodyData.AdministratorRights.CanReadOnly = data.AdministratorRights.Attributes()["can_read_only"].(types.Bool).ValueBool()
 	// bodyData.AdministratorRights.IsMaker = data.AdministratorRights.Attributes()["is_maker"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.IsChecker = data.AdministratorRights.Attributes()["is_checker"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanCreateUsers = data.AdministratorRights.Attributes()["can_create_users"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanUpdateUsers = data.AdministratorRights.Attributes()["can_update_users"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanAccessHelpDesk = data.AdministratorRights.Attributes()["can_access_help_desk"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanSeeFullAuditLog = data.AdministratorRights.Attributes()["can_see_full_audit_log"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageAdministrators = data.AdministratorRights.Attributes()["can_manage_administrators"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageApplications = data.AdministratorRights.Attributes()["can_manage_applications"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageSharedFolders = data.AdministratorRights.Attributes()["can_manage_shared_folders"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageBusinessUnits = data.AdministratorRights.Attributes()["can_manage_business_units"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageRouteTemplates = data.AdministratorRights.Attributes()["can_manage_route_templates"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageExternalScriptStep = data.AdministratorRights.Attributes()["can_manage_external_script_step"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageExternalScriptRootExecution = data.AdministratorRights.Attributes()["can_manage_external_script_root_execution"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageLoginRestrictionPolicies = data.AdministratorRights.Attributes()["can_manage_login_restriction_policies"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageIcapSettings = data.AdministratorRights.Attributes()["can_manage_icap_settings"].(types.Bool).ValueBool()
 
 	// if len(data.BusinessUnits.Elements()) == 0 {
 	// 	bodyData.BusinessUnits = []string{}
@@ -334,14 +327,18 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	// 	bodyData.FullCreationPath = data.FullCreationPath.ValueString()
 	// }
 
-	// url := "/api/v2.0/administrators/"
-	// _, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error making API http request",
-	// 		fmt.Sprintf("Error was: %s.", err.Error()))
-	// 	return
-	// }
+	url := "/api/v2.0/businessUnits/"
+	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error making API http request",
+			fmt.Sprintf("Error was: %s.", err.Error()))
+		return
+	}
+
+	if data.BusinessUnitHierarchy.IsUnknown() {
+		data.BusinessUnitHierarchy = data.Name
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -354,31 +351,30 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	// loginName := strings.Trim(data.LoginName.String(), "\"")
-	// url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
+	url := fmt.Sprintf("/api/v2.0/businessUnits/%s/", data.Name.ValueString())
 
-	// body, statusCode, err := r.client.GenericAPIRequest(ctx, http.MethodGet, url, nil, []int{200, 404})
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error making API http request",
-	// 		fmt.Sprintf("Error was: %s.", err.Error()))
-	// 	return
-	// }
+	body, statusCode, err := r.client.GenericAPIRequest(ctx, http.MethodGet, url, nil, []int{200, 404})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error making API http request",
+			fmt.Sprintf("Error was: %s.", err.Error()))
+		return
+	}
 
-	// if statusCode == 404 {
-	// 	resp.State.RemoveResource(ctx)
-	// 	return
-	// }
+	if statusCode == 404 {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 
-	// var responseData AdministratorsAPIModel
+	var responseData BusinessUnitsAPIModel
 
-	// err = json.Unmarshal(body, &responseData)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Unable to unmarshal json",
-	// 		fmt.Sprintf("bodyData: %+v.", body))
-	// 	return
-	// }
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to unmarshal json",
+			fmt.Sprintf("bodyData: %+v.", body))
+		return
+	}
 
 	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), responseData.LoginName)...)
 	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("role_name"), responseData.RoleName)...)
