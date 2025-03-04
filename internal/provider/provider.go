@@ -45,19 +45,15 @@ func (p *axwaystProvider) Schema(ctx context.Context, req provider.SchemaRequest
 		Description: "Provider for Axway Secure Transport",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
-				Description: "URL for Axway ST Admin (i.e. https://axway.com:8443)",
+				Description: "URL for Axway ST Admin (i.e. https://axway.example.com:8444). This can be omitted if you set an environment variable named AXWAYST_HOST.",
 				Optional:    true,
 			},
-			// "token": schema.StringAttribute{
-			// 	Description: "Axway ST access token (instead of username/password)",
-			// 	Optional:    true,
-			// },
 			"username": schema.StringAttribute{
-				Description: "Axway ST username",
+				Description: "Axway ST username. This can be omitted if you set an environment variable named AXWAYST_USERNAME.",
 				Optional:    true,
 			},
 			"password": schema.StringAttribute{
-				Description: "Axway ST password",
+				Description: "Axway ST password. This can be omitted if you set an environment variable named AXWAYST_PASSWORD.",
 				Optional:    true,
 			},
 		},
@@ -142,6 +138,7 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *axwaystProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewAdministratorsResource,
+		NewBusinessUnitsResource,
 	}
 }
 
