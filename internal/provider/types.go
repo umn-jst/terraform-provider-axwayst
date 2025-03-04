@@ -4,6 +4,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+type BusinessUnitsModel struct {
+	Name                       types.String `tfsdk:"name"`
+	BaseFolder                 types.String `tfsdk:"base_folder"`
+	Parent                     types.String `tfsdk:"parent"`
+	BusinessUnitHierarchy      types.String `tfsdk:"business_unit_hierarchy"`
+	BaseFolderModifyingAllowed types.Bool   `tfsdk:"base_folder_modifying_allowed"`
+	HomeFolderModifyingAllowed types.Bool   `tfsdk:"home_folder_modifying_allowed"`
+	DMZ                        types.String `tfsdk:"dmz"`
+	ManagedByCG                types.Bool   `tfsdk:"managed_by_cg"`
+	EnabledIcapServers         types.Set    `tfsdk:"enabled_icap_servers"`
+	AdditionalAttributes       types.Map    `tfsdk:"additional_attributes"`
+}
+
+type BusinessUnitsAPIModel struct {
+	Name                       string            `json:"name"`
+	BaseFolder                 string            `json:"baseFolder"`
+	Parent                     string            `json:"parent"`
+	BusinessUnitHierarchy      string            `json:"businessUnitHierarchy"`
+	BaseFolderModifyingAllowed bool              `json:"baseFolderModifyingAllowed"`
+	HomeFolderModifyingAllowed bool              `json:"homeFolderModifyingAllowed"`
+	DMZ                        string            `json:"dmz"`
+	ManagedByCG                bool              `json:"managedByCG"`
+	EnabledIcapServers         []string          `json:"enabledIcapServers"`
+	AdditionalAttributes       map[string]string `json:"additionalAttributes"`
+}
+
 type AdministratorsModel struct {
 	AdministratorRights types.Object `tfsdk:"administrator_rights"`
 	BusinessUnits       types.Set    `tfsdk:"business_units"`
