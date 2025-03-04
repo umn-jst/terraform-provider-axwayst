@@ -293,8 +293,26 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
 	bodyData.DMZ = data.DMZ.ValueString()
 	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
-	// bodyData.EnabledIcapServers = data.
-	// bodyData.AdditionalAttributes = data.
+
+	additionalAttr := make(map[string]string, len(data.AdditionalAttributes.Elements()))
+	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &additionalAttr, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(additionalAttr) > 0 {
+		bodyData.AdditionalAttributes = additionalAttr
+	}
+
+	icapServers := make([]string, 0, len(data.EnabledIcapServers.Elements()))
+	resp.Diagnostics.Append(data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(icapServers) > 0 {
+		bodyData.EnabledIcapServers = icapServers
+	}
 
 	// bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
 	// bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
