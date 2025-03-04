@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -353,8 +352,7 @@ func (r *AdministratorsResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	loginName := strings.Trim(data.LoginName.String(), "\"")
-	url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
+	url := fmt.Sprintf("/api/v2.0/administrators/%s/", data.LoginName.ValueString())
 
 	body, statusCode, err := r.client.GenericAPIRequest(ctx, http.MethodGet, url, nil, []int{200, 404})
 	if err != nil {
@@ -498,8 +496,7 @@ func (r *AdministratorsResource) Update(ctx context.Context, req resource.Update
 		bodyData.FullCreationPath = data.FullCreationPath.ValueString()
 	}
 
-	loginName := strings.Trim(data.LoginName.String(), "\"")
-	url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
+	url := fmt.Sprintf("/api/v2.0/administrators/%s/", data.LoginName.ValueString())
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -519,8 +516,7 @@ func (r *AdministratorsResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	loginName := strings.Trim(data.LoginName.String(), "\"")
-	url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
+	url := fmt.Sprintf("/api/v2.0/administrators/%s/", data.LoginName.ValueString())
 
 	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodDelete, url, nil, []int{202, 204})
 	if err != nil {
