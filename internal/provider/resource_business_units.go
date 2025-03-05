@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -89,171 +93,106 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 				ElementType: types.StringType,
 				Description: `Additional attributes which are defined with "key": "value" pairs. Keys must start with "userVars." prefix, follow the pattern: [a-zA-Z0-9_.]+ and have length between 10 and 255 characters (including the prefix). Non prefixed part of key should not start with "userVars.", since it is a reserved word. Both key and value cannot be blank.`,
 			},
-			// "password_credentials": schema.SingleNestedAttribute{
-			// 	Optional: true,
-			// 	Computed: true,
-			// 	Attributes: map[string]schema.Attribute{
-			// 		"password": schema.StringAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  stringdefault.StaticString(""),
-			// 		},
-			// 		"password_expired": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(false),
-			// 		},
-			// 	},
-			// 	Default: objectdefault.StaticValue(
-			// 		types.ObjectValueMust(
-			// 			map[string]attr.Type{
-			// 				"password":         types.StringType,
-			// 				"password_expired": types.BoolType,
-			// 			},
-			// 			map[string]attr.Value{
-			// 				"password":         types.StringValue(""),
-			// 				"password_expired": types.BoolValue(false),
-			// 			},
-			// 		),
-			// 	),
-			// },
-			// "administrator_rights": schema.SingleNestedAttribute{
-			// 	Optional: true,
-			// 	Computed: true,
-			// 	Attributes: map[string]schema.Attribute{
-			// 		"can_read_only": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(false),
-			// 		},
-			// 		"is_maker": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"is_checker": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_create_users": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_update_users": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_access_help_desk": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_see_full_audit_log": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_administrators": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_applications": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_shared_folders": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_business_units": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_route_templates": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_external_script_step": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_external_script_root_execution": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_login_restriction_policies": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 		"can_manage_icap_settings": schema.BoolAttribute{
-			// 			Optional: true,
-			// 			Computed: true,
-			// 			Default:  booldefault.StaticBool(true),
-			// 		},
-			// 	},
-			// 	Default: objectdefault.StaticValue(
-			// 		types.ObjectValueMust(
-			// 			map[string]attr.Type{
-			// 				"can_read_only":                             types.BoolType,
-			// 				"is_maker":                                  types.BoolType,
-			// 				"is_checker":                                types.BoolType,
-			// 				"can_create_users":                          types.BoolType,
-			// 				"can_update_users":                          types.BoolType,
-			// 				"can_access_help_desk":                      types.BoolType,
-			// 				"can_see_full_audit_log":                    types.BoolType,
-			// 				"can_manage_administrators":                 types.BoolType,
-			// 				"can_manage_applications":                   types.BoolType,
-			// 				"can_manage_shared_folders":                 types.BoolType,
-			// 				"can_manage_business_units":                 types.BoolType,
-			// 				"can_manage_route_templates":                types.BoolType,
-			// 				"can_manage_external_script_step":           types.BoolType,
-			// 				"can_manage_external_script_root_execution": types.BoolType,
-			// 				"can_manage_login_restriction_policies":     types.BoolType,
-			// 				"can_manage_icap_settings":                  types.BoolType,
-			// 			},
-			// 			map[string]attr.Value{
-			// 				"can_read_only":                             types.BoolValue(false),
-			// 				"is_maker":                                  types.BoolValue(true),
-			// 				"is_checker":                                types.BoolValue(true),
-			// 				"can_create_users":                          types.BoolValue(true),
-			// 				"can_update_users":                          types.BoolValue(true),
-			// 				"can_access_help_desk":                      types.BoolValue(true),
-			// 				"can_see_full_audit_log":                    types.BoolValue(true),
-			// 				"can_manage_administrators":                 types.BoolValue(true),
-			// 				"can_manage_applications":                   types.BoolValue(true),
-			// 				"can_manage_shared_folders":                 types.BoolValue(true),
-			// 				"can_manage_business_units":                 types.BoolValue(true),
-			// 				"can_manage_route_templates":                types.BoolValue(true),
-			// 				"can_manage_external_script_step":           types.BoolValue(true),
-			// 				"can_manage_external_script_root_execution": types.BoolValue(true),
-			// 				"can_manage_login_restriction_policies":     types.BoolValue(true),
-			// 				"can_manage_icap_settings":                  types.BoolValue(true),
-			// 			},
-			// 		),
-			// 	),
-			// },
-			// "business_units": schema.SetAttribute{
-			// 	Optional:    true,
-			// 	ElementType: types.StringType,
-			// 	Default: setdefault.StaticValue(
-			// 		types.SetValueMust(
-			// 			types.StringType,
-			// 			[]attr.Value{},
-			// 		),
-			// 	),
-			// 	Computed: true,
-			// },
+			"bandwidth_limits": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"policy": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Bandwidth policy.",
+						Default:     stringdefault.StaticString("default"),
+						Validators:  []validator.String{stringvalidator.OneOf("default", "custom", "disabled")},
+					},
+					"modify_limits_allowed": schema.BoolAttribute{
+						Description: "Whether modifying limits is allowed.",
+						Optional:    true,
+					},
+					"inbound_limit": schema.Int32Attribute{
+						Optional:    true,
+						Description: "Bandwidth's inbound limit.",
+					},
+					"outbound_limit": schema.Int32Attribute{
+						Optional:    true,
+						Description: "Bandwidth's outbound limit.",
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"policy":                types.StringType,
+							"modify_limits_allowed": types.BoolType,
+							"inbound_limit":         types.Int32Type,
+							"outbound_limit":        types.Int32Type,
+						},
+						map[string]attr.Value{
+							"policy":                types.StringValue("default"),
+							"modify_limits_allowed": types.BoolNull(),
+							"inbound_limit":         types.Int32Null(),
+							"outbound_limit":        types.Int32Null(),
+						},
+					),
+				),
+			},
+			"html_template_settings": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"html_template_folder_path": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The HTML template directory path on the local system used for this business unit entity",
+						Default:     stringdefault.StaticString("Default HTML Template"),
+						Validators:  []validator.String{stringvalidator.OneOf("Default HTML Template", "ST Web Client")},
+					},
+					"is_allowed_for_modifying": schema.BoolAttribute{
+						Description: "Flag indicating if the HTML Template folder may be modified",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"html_template_folder_path": types.StringType,
+							"is_allowed_for_modifying":  types.BoolType,
+						},
+						map[string]attr.Value{
+							"html_template_folder_path": types.StringValue("Default HTML Template"),
+							"is_allowed_for_modifying":  types.BoolValue(false),
+						},
+					),
+				),
+			},
+			"transfers_api_settings": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"transfers_web_service_allowed": schema.BoolAttribute{
+						Description: "Defines whether the access to the /transfers resource from the End-user REST API is allowed",
+						Optional:    true,
+					},
+					"is_web_service_rights_modifying_allowed": schema.BoolAttribute{
+						Description: "Flag indicating if web services rights are allowed for modifying",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"transfers_web_service_allowed":           types.BoolType,
+							"is_web_service_rights_modifying_allowed": types.BoolType,
+						},
+						map[string]attr.Value{
+							"transfers_web_service_allowed":           types.BoolNull(),
+							"is_web_service_rights_modifying_allowed": types.BoolValue(false),
+						},
+					),
+				),
+			},
 		},
 	}
 }
@@ -313,37 +252,16 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	if len(icapServers) > 0 {
 		bodyData.EnabledIcapServers = icapServers
 	}
+	bodyData.BandwidthLimits.Policy = data.BandwidthLimits.Attributes()["policy"].(types.String).ValueString()
+	bodyData.BandwidthLimits.ModifyLimitsAllowed = data.BandwidthLimits.Attributes()["modify_limits_allowed"].(types.Bool).ValueBool()
+	bodyData.BandwidthLimits.InboundLimit = data.BandwidthLimits.Attributes()["inbound_limit"].(types.Int32).ValueInt32()
+	bodyData.BandwidthLimits.OutboundLimit = data.BandwidthLimits.Attributes()["outbound_limit"].(types.Int32).ValueInt32()
 
-	// bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
-	// bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
+	bodyData.HtmlTemplateSettings.HtmlTemplateFolderPath = data.HtmlTemplateSettings.Attributes()["html_template_folder_path"].(types.String).ValueString()
+	bodyData.HtmlTemplateSettings.IsAllowedForModifying = data.HtmlTemplateSettings.Attributes()["is_allowed_for_modifying"].(types.Bool).ValueBool()
 
-	// bodyData.AdministratorRights.CanReadOnly = data.AdministratorRights.Attributes()["can_read_only"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.IsMaker = data.AdministratorRights.Attributes()["is_maker"].(types.Bool).ValueBool()
-
-	// if len(data.BusinessUnits.Elements()) == 0 {
-	// 	bodyData.BusinessUnits = []string{}
-	// } else {
-	// 	for _, element := range data.BusinessUnits.Elements() {
-	// 		if str, ok := element.(types.String); ok {
-	// 			bodyData.BusinessUnits = append(bodyData.BusinessUnits, str.ValueString())
-	// 		} else {
-	// 			resp.Diagnostics.AddError(
-	// 				"Error converting BusinessUnit elements to string",
-	// 				fmt.Sprintf("Business units set: %v.", data.BusinessUnits))
-	// 			return
-	// 		}
-	// 	}
-	// }
-
-	// if !(data.CertificateDn.IsNull()) {
-	// 	bodyData.CertificateDn = data.CertificateDn.ValueString()
-	// }
-	// if !(data.Parent.IsNull()) {
-	// 	bodyData.Parent = data.Parent.ValueString()
-	// }
-	// if !(data.FullCreationPath.IsNull()) {
-	// 	bodyData.FullCreationPath = data.FullCreationPath.ValueString()
-	// }
+	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = data.TransfersApiSettings.Attributes()["is_web_service_rights_modifying_allowed"].(types.Bool).ValueBool()
+	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = data.TransfersApiSettings.Attributes()["transfers_web_service_allowed"].(types.Bool).ValueBool()
 
 	url := "/api/v2.0/businessUnits/"
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
