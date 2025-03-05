@@ -281,7 +281,6 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 					),
 				),
 			},
-
 			"file_archiving_settings": schema.SingleNestedAttribute{
 				Optional: true,
 				Computed: true,
@@ -358,6 +357,34 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 							"policy_modifying_allowed":      types.BoolValue(false),
 							"custom_folder":                 types.StringValue(""),
 							"custom_encryption_certificate": types.StringNull(),
+						},
+					),
+				),
+			},
+			"login_restriction_settings": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"policy": schema.StringAttribute{
+						Description: "The login restriction policy for this business unit.",
+						Optional:    true,
+					},
+					"is_policy_modifying_allowed": schema.BoolAttribute{
+						Description: "Flag indicating whether the login restriction policy option is modifiable on account level.",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"policy":                      types.StringType,
+							"is_policy_modifying_allowed": types.BoolType,
+						},
+						map[string]attr.Value{
+							"policy":                      types.StringNull(),
+							"is_policy_modifying_allowed": types.BoolValue(false),
 						},
 					),
 				),
@@ -458,6 +485,9 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	bodyData.FileArchivingSettings.CustomEncryptionCertificate = data.FileArchivingSettings.Attributes()["custom_encryption_certificate"].(types.String).ValueString()
 	bodyData.FileArchivingSettings.CustomFileSizePolicy = data.FileArchivingSettings.Attributes()["custom_file_size_policy"].(types.String).ValueString()
 	bodyData.FileArchivingSettings.CustomFileSize = data.FileArchivingSettings.Attributes()["custom_file_size"].(types.Int32).ValueInt32()
+
+	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = data.LoginRestrictionSettings.Attributes()["is_policy_modifying_allowed"].(types.Bool).ValueBool()
+	bodyData.LoginRestrictionSettings.Policy = data.LoginRestrictionSettings.Attributes()["policy"].(types.String).ValueString()
 
 	url := "/api/v2.0/businessUnits/"
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})

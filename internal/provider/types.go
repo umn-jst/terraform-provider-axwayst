@@ -21,25 +21,27 @@ type BusinessUnitsModel struct {
 	TransfersApiSettings              types.Object `tfsdk:"transfers_api_settings"`
 	AdHocSettings                     types.Object `tfsdk:"adhoc_settings"`
 	FileArchivingSettings             types.Object `tfsdk:"file_archiving_settings"`
+	LoginRestrictionSettings          types.Object `tfsdk:"login_restriction_settings"`
 }
 
 type BusinessUnitsAPIModel struct {
-	Name                              string                         `json:"name"`
-	BaseFolder                        string                         `json:"baseFolder"`
-	Parent                            string                         `json:"parent"`
-	BusinessUnitHierarchy             string                         `json:"businessUnitHierarchy"`
-	BaseFolderModifyingAllowed        bool                           `json:"baseFolderModifyingAllowed"`
-	HomeFolderModifyingAllowed        bool                           `json:"homeFolderModifyingAllowed"`
-	DMZ                               string                         `json:"dmz"`
-	ManagedByCG                       bool                           `json:"managedByCG"`
-	EnabledIcapServers                []string                       `json:"enabledIcapServers,omitempty"`
-	AdditionalAttributes              map[string]string              `json:"additionalAttributes,omitempty"`
-	SharedFoldersCollaborationAllowed bool                           `json:"sharedFoldersCollaborationAllowed"`
-	BandwidthLimits                   BuBandwidthLimitsAPIModel      `json:"bandwidthLimits"`
-	HtmlTemplateSettings              BuHtmlTemplateSettingsAPIModel `json:"htmlTemplateSettings"`
-	TransfersApiSettings              BuTransferAPISettingsAPIModel  `json:"transfersApiSettings"`
-	AdHocSettings                     BuAdHocSettingsAPIModel        `json:"adHocSettings"`
-	FileArchivingSettings             BuFileArchiveSettingsAPIModel  `json:"fileArchivingSettings"`
+	Name                              string                             `json:"name"`
+	BaseFolder                        string                             `json:"baseFolder"`
+	Parent                            string                             `json:"parent"`
+	BusinessUnitHierarchy             string                             `json:"businessUnitHierarchy"`
+	BaseFolderModifyingAllowed        bool                               `json:"baseFolderModifyingAllowed"`
+	HomeFolderModifyingAllowed        bool                               `json:"homeFolderModifyingAllowed"`
+	DMZ                               string                             `json:"dmz"`
+	ManagedByCG                       bool                               `json:"managedByCG"`
+	EnabledIcapServers                []string                           `json:"enabledIcapServers,omitempty"`
+	AdditionalAttributes              map[string]string                  `json:"additionalAttributes,omitempty"`
+	SharedFoldersCollaborationAllowed bool                               `json:"sharedFoldersCollaborationAllowed"`
+	BandwidthLimits                   BuBandwidthLimitsAPIModel          `json:"bandwidthLimits"`
+	HtmlTemplateSettings              BuHtmlTemplateSettingsAPIModel     `json:"htmlTemplateSettings"`
+	TransfersApiSettings              BuTransferAPISettingsAPIModel      `json:"transfersApiSettings"`
+	AdHocSettings                     BuAdHocSettingsAPIModel            `json:"adHocSettings"`
+	FileArchivingSettings             BuFileArchiveSettingsAPIModel      `json:"fileArchivingSettings"`
+	LoginRestrictionSettings          BuLoginRestrictionSettingsAPIModel `json:"loginRestrictionSettings"`
 }
 
 type BuBandwidthLimitsAPIModel struct {
@@ -79,6 +81,11 @@ type BuFileArchiveSettingsAPIModel struct {
 	PolicyModifyingAllowed      bool   `json:"policyModifyingAllowed,omitempty"`
 	CustomFolder                string `json:"customFolder,omitempty"`
 	CustomEncryptionCertificate string `json:"customEncryptionCertificate,omitempty"`
+}
+
+type BuLoginRestrictionSettingsAPIModel struct {
+	Policy                   string `json:"policy,omitempty"`
+	IsPolicyModifyingAllowed bool   `json:"isPolicyModifyingAllowed,omitempty"`
 }
 
 type AdministratorsModel struct {
