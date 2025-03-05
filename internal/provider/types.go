@@ -5,29 +5,67 @@ import (
 )
 
 type BusinessUnitsModel struct {
-	Name                       types.String `tfsdk:"name"`
-	BaseFolder                 types.String `tfsdk:"base_folder"`
-	Parent                     types.String `tfsdk:"parent"`
-	BusinessUnitHierarchy      types.String `tfsdk:"business_unit_hierarchy"`
-	BaseFolderModifyingAllowed types.Bool   `tfsdk:"base_folder_modifying_allowed"`
-	HomeFolderModifyingAllowed types.Bool   `tfsdk:"home_folder_modifying_allowed"`
-	DMZ                        types.String `tfsdk:"dmz"`
-	ManagedByCG                types.Bool   `tfsdk:"managed_by_cg"`
-	EnabledIcapServers         types.Set    `tfsdk:"enabled_icap_servers"`
-	AdditionalAttributes       types.Map    `tfsdk:"additional_attributes"`
+	Name                              types.String `tfsdk:"name"`
+	BaseFolder                        types.String `tfsdk:"base_folder"`
+	Parent                            types.String `tfsdk:"parent"`
+	BusinessUnitHierarchy             types.String `tfsdk:"business_unit_hierarchy"`
+	BaseFolderModifyingAllowed        types.Bool   `tfsdk:"base_folder_modifying_allowed"`
+	HomeFolderModifyingAllowed        types.Bool   `tfsdk:"home_folder_modifying_allowed"`
+	DMZ                               types.String `tfsdk:"dmz"`
+	ManagedByCG                       types.Bool   `tfsdk:"managed_by_cg"`
+	EnabledIcapServers                types.Set    `tfsdk:"enabled_icap_servers"`
+	AdditionalAttributes              types.Map    `tfsdk:"additional_attributes"`
+	SharedFoldersCollaborationAllowed types.Bool   `tfsdk:"shared_folders_collaboration_allowed"`
+	BandwidthLimits                   types.Object `tfsdk:"bandwidth_limits"`
+	HtmlTemplateSettings              types.Object `tfsdk:"html_template_settings"`
+	TransfersApiSettings              types.Object `tfsdk:"transfers_api_settings"`
+	AdHocSettings                     types.Object `tfsdk:"adhoc_settings"`
 }
 
 type BusinessUnitsAPIModel struct {
-	Name                       string            `json:"name"`
-	BaseFolder                 string            `json:"baseFolder"`
-	Parent                     string            `json:"parent"`
-	BusinessUnitHierarchy      string            `json:"businessUnitHierarchy"`
-	BaseFolderModifyingAllowed bool              `json:"baseFolderModifyingAllowed"`
-	HomeFolderModifyingAllowed bool              `json:"homeFolderModifyingAllowed"`
-	DMZ                        string            `json:"dmz"`
-	ManagedByCG                bool              `json:"managedByCG"`
-	EnabledIcapServers         []string          `json:"enabledIcapServers,omitempty"`
-	AdditionalAttributes       map[string]string `json:"additionalAttributes,omitempty"`
+	Name                              string                         `json:"name"`
+	BaseFolder                        string                         `json:"baseFolder"`
+	Parent                            string                         `json:"parent"`
+	BusinessUnitHierarchy             string                         `json:"businessUnitHierarchy"`
+	BaseFolderModifyingAllowed        bool                           `json:"baseFolderModifyingAllowed"`
+	HomeFolderModifyingAllowed        bool                           `json:"homeFolderModifyingAllowed"`
+	DMZ                               string                         `json:"dmz"`
+	ManagedByCG                       bool                           `json:"managedByCG"`
+	EnabledIcapServers                []string                       `json:"enabledIcapServers,omitempty"`
+	AdditionalAttributes              map[string]string              `json:"additionalAttributes,omitempty"`
+	SharedFoldersCollaborationAllowed bool                           `json:"sharedFoldersCollaborationAllowed"`
+	BandwidthLimits                   BuBandwidthLimitsAPIModel      `json:"bandwidthLimits"`
+	HtmlTemplateSettings              BuHtmlTemplateSettingsAPIModel `json:"htmlTemplateSettings"`
+	TransfersApiSettings              BuTransferAPISettingsAPIModel  `json:"transfersApiSettings"`
+	AdHocSettings                     BuAdHocSettingsAPIModel        `json:"adHocSettings"`
+}
+
+type BuBandwidthLimitsAPIModel struct {
+	Policy              string `json:"policy"`
+	ModifyLimitsAllowed bool   `json:"modifyLimitsAllowed,omitempty"`
+	InboundLimit        int32  `json:"inboundLimit,omitempty"`
+	OutboundLimit       int32  `json:"outboundLimit,omitempty"`
+}
+
+type BuHtmlTemplateSettingsAPIModel struct {
+	HtmlTemplateFolderPath string `json:"htmlTemplateFolderPath"`
+	IsAllowedForModifying  bool   `json:"isAllowedForModifying"`
+}
+
+type BuTransferAPISettingsAPIModel struct {
+	TransfersWebServiceAllowed         bool `json:"transfersWebServiceAllowed"`
+	IsWebServiceRightsModifyingAllowed bool `json:"isWebServiceRightsModifyingAllowed"`
+}
+
+type BuAdHocSettingsAPIModel struct {
+	AuthByEmail                    bool     `json:"authByEmail"`
+	AuthByEmailModifyingAllowed    bool     `json:"authByEmailModifyingAllowed"`
+	DeliveryMethodModifyingAllowed bool     `json:"deliveryMethodModifyingAllowed"`
+	DeliveryMethod                 string   `json:"deliveryMethod"`
+	EnrollmentTypes                []string `json:"enrollmentTypes"`
+	ImplicitEnrollmentType         string   `json:"implicitEnrollmentType"`
+	EnrollmentTemplate             string   `json:"enrollmentTemplate"`
+	NotificationTemplate           string   `json:"notificationTemplate"`
 }
 
 type AdministratorsModel struct {
