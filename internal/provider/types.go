@@ -58,14 +58,14 @@ type BuTransferAPISettingsAPIModel struct {
 }
 
 type BuAdHocSettingsAPIModel struct {
-	AuthByEmail                    bool     `json:"authByEmail"`
-	AuthByEmailModifyingAllowed    bool     `json:"authByEmailModifyingAllowed"`
-	DeliveryMethodModifyingAllowed bool     `json:"deliveryMethodModifyingAllowed"`
-	DeliveryMethod                 string   `json:"deliveryMethod"`
-	EnrollmentTypes                []string `json:"enrollmentTypes"`
-	ImplicitEnrollmentType         string   `json:"implicitEnrollmentType"`
-	EnrollmentTemplate             string   `json:"enrollmentTemplate"`
-	NotificationTemplate           string   `json:"notificationTemplate"`
+	AuthByEmail                    bool     `json:"authByEmail,omitempty"`
+	AuthByEmailModifyingAllowed    bool     `json:"authByEmailModifyingAllowed,omitempty"`
+	DeliveryMethodModifyingAllowed bool     `json:"deliveryMethodModifyingAllowed,omitempty"`
+	DeliveryMethod                 string   `json:"deliveryMethod,omitempty"`
+	EnrollmentTypes                []string `json:"enrollmentTypes,omitempty"`
+	ImplicitEnrollmentType         string   `json:"implicitEnrollmentType,omitempty"`
+	EnrollmentTemplate             string   `json:"enrollmentTemplate,omitempty"`
+	NotificationTemplate           string   `json:"notificationTemplate,omitempty"`
 }
 
 type AdministratorsModel struct {

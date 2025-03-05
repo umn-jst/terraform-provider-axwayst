@@ -88,6 +88,10 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 				),
 				Computed: true,
 			},
+			"shared_folders_collaboration_allowed": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Flag indicating if accounts may collaborate using, creating and sharing folders.",
+			},
 			"additional_attributes": schema.MapAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
@@ -193,6 +197,88 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 					),
 				),
 			},
+			"adhoc_settings": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"auth_by_email": schema.BoolAttribute{
+						Description: "Flag indicating if auth is by email",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+					"auth_by_email_modifying_allowed": schema.BoolAttribute{
+						Description: "Flag indicating if auth by email is allowed for modifying",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+					"delivery_method_modifying_allowed": schema.BoolAttribute{
+						Description: "Flag indicating if the belonging accounts' could enroll other accounts",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+					"delivery_method": schema.StringAttribute{
+						Description: `This property defines the delivery method. When deliveryMethod is set to 'Disabled' then Adhoc is disabled and enrollmentType/implicitEnrollmentType can not be set. When deliveryMethod is set to 'Default' then it is only available on BU and Account (setting the BU to use the value and account to use the BU value). When deliveryMethod is set to 'Anonymous' then implicit enrollment types 'Anonymous' and "" (Select by sender) are enabled. When deliveryMethod is set to 'Account Without Enrollment' then implicit enrollment types 'Anonymous', ""  (Select by sender) and 'Existing Account' are enabled. When deliveryMethod is set to 'Account With Enrollment' then implicit enrollment types 'Anonymous', "" (Select by sender), 'Enroll unlicensed', 'Enroll licensed' are enabled`,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString("DEFAULT"),
+						Validators:  []validator.String{stringvalidator.OneOf("DEFAULT", "DISABLED", "ANONYMOUS", "ACCOUNT_WITHOUT_ENROLLMENT", "ACCOUNT_WITH_ENROLLMENT", "CUSTOM")},
+					},
+					"enrollment_types": schema.SetAttribute{
+						Optional:    true,
+						Description: "This property is used for a custom delivery method and can be set only if deliveryMethod property is set to 'Custom'.",
+						ElementType: types.StringType,
+						Default: setdefault.StaticValue(
+							types.SetValueMust(
+								types.StringType,
+								[]attr.Value{},
+							),
+						),
+						Computed: true,
+					},
+					"implicit_enrollment_type": schema.StringAttribute{
+						Optional:    true,
+						Description: `The Implicit Enrollment Type value of the business unit entity. This property controls which option Web Access Plus selects initially in the User Access window and which enrollment type is used by the Axway Email Plug-ins. The choices depend on the enrollment types enabled by the Delivery Methods and Enrollment Types fields`,
+						Validators:  []validator.String{stringvalidator.OneOf("ANONYMOUS_LINK", "CHALLENGED_LINK", "EXISTING_ACCOUNT", "ENROLL_UNLICENSED", "ENROLL_LICENSED", "ENROLL_MOBILE")},
+					},
+					"enrollment_template": schema.StringAttribute{
+						Optional:    true,
+						Description: "The name of the notification template for this business unit entity",
+						Computed:    true,
+						Default:     stringdefault.StaticString("default"),
+					},
+					"notification_template": schema.StringAttribute{
+						Description: "The notification template",
+						Optional:    true,
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"auth_by_email":                     types.BoolType,
+							"auth_by_email_modifying_allowed":   types.BoolType,
+							"delivery_method_modifying_allowed": types.BoolType,
+							"delivery_method":                   types.StringType,
+							"enrollment_types":                  types.SetType{ElemType: types.StringType},
+							"implicit_enrollment_type":          types.StringType,
+							"enrollment_template":               types.StringType,
+							"notification_template":             types.StringType,
+						},
+						map[string]attr.Value{
+							"auth_by_email":                     types.BoolValue(false),
+							"auth_by_email_modifying_allowed":   types.BoolValue(false),
+							"delivery_method_modifying_allowed": types.BoolValue(false),
+							"delivery_method":                   types.StringValue("DEFAULT"),
+							"enrollment_types":                  types.SetNull(types.StringType),
+							"implicit_enrollment_type":          types.StringNull(),
+							"enrollment_template":               types.StringValue("default"),
+							"notification_template":             types.StringNull(),
+						},
+					),
+				),
+			},
 		},
 	}
 }
@@ -262,6 +348,24 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 
 	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = data.TransfersApiSettings.Attributes()["is_web_service_rights_modifying_allowed"].(types.Bool).ValueBool()
 	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = data.TransfersApiSettings.Attributes()["transfers_web_service_allowed"].(types.Bool).ValueBool()
+
+	bodyData.AdHocSettings.AuthByEmail = data.AdHocSettings.Attributes()["auth_by_email"].(types.Bool).ValueBool()
+	bodyData.AdHocSettings.AuthByEmailModifyingAllowed = data.AdHocSettings.Attributes()["auth_by_email_modifying_allowed"].(types.Bool).ValueBool()
+	bodyData.AdHocSettings.DeliveryMethodModifyingAllowed = data.AdHocSettings.Attributes()["delivery_method_modifying_allowed"].(types.Bool).ValueBool()
+	bodyData.AdHocSettings.DeliveryMethod = data.AdHocSettings.Attributes()["delivery_method"].(types.String).ValueString()
+
+	var enrlTypes []string
+
+	resp.Diagnostics.Append(data.AdHocSettings.Attributes()["enrollment_types"].(types.Set).ElementsAs(ctx, &enrlTypes, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.AdHocSettings.EnrollmentTypes = enrlTypes
+
+	bodyData.AdHocSettings.ImplicitEnrollmentType = data.AdHocSettings.Attributes()["implicit_enrollment_type"].(types.String).ValueString()
+	bodyData.AdHocSettings.EnrollmentTemplate = data.AdHocSettings.Attributes()["enrollment_template"].(types.String).ValueString()
+	bodyData.AdHocSettings.NotificationTemplate = data.AdHocSettings.Attributes()["notification_template"].(types.String).ValueString()
 
 	url := "/api/v2.0/businessUnits/"
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
