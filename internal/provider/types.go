@@ -71,14 +71,14 @@ type BuAdHocSettingsAPIModel struct {
 }
 
 type BuFileArchiveSettingsAPIModel struct {
-	Policy                      string `json:"policy"`
-	FolderPolicy                string `json:"folderPolicy"`
-	EncryptionCertificatePolicy string `json:"encryptionCertificatePolicy"`
-	CustomFileSizePolicy        string `json:"customFileSizePolicy"`
-	CustomFileSize              int32  `json:"customFileSize"`
-	PolicyModifyingAllowed      bool   `json:"policyModifyingAllowed"`
-	CustomFolder                string `json:"customFolder"`
-	CustomEncryptionCertificate string `json:"customEncryptionCertificate"`
+	Policy                      string `json:"policy,omitempty"`
+	FolderPolicy                string `json:"folderPolicy,omitempty"`
+	EncryptionCertificatePolicy string `json:"encryptionCertificatePolicy,omitempty"`
+	CustomFileSizePolicy        string `json:"customFileSizePolicy,omitempty"`
+	CustomFileSize              int32  `json:"customFileSize,omitempty"`
+	PolicyModifyingAllowed      bool   `json:"policyModifyingAllowed,omitempty"`
+	CustomFolder                string `json:"customFolder,omitempty"`
+	CustomEncryptionCertificate string `json:"customEncryptionCertificate,omitempty"`
 }
 
 type AdministratorsModel struct {

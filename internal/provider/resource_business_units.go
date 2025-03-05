@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -279,6 +281,87 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 					),
 				),
 			},
+
+			"file_archiving_settings": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"policy": schema.StringAttribute{
+						Description: "Defines whether the child business units are allowed to modify archiving policy",
+						Optional:    true,
+						Default:     stringdefault.StaticString("default"),
+						Computed:    true,
+						Validators:  []validator.String{stringvalidator.OneOf("default", "enabled", "disabled")},
+					},
+					"policy_modifying_allowed": schema.BoolAttribute{
+						Description: " Defines whether the child business units are allowed to modify archiving policy.",
+						Optional:    true,
+						Default:     booldefault.StaticBool(false),
+						Computed:    true,
+					},
+					"folder_policy": schema.StringAttribute{
+						Description: "Defines whether account under BU can modify folder.",
+						Optional:    true,
+						Default:     stringdefault.StaticString("default"),
+						Computed:    true,
+						Validators:  []validator.String{stringvalidator.OneOf("default", "custom")},
+					},
+					"custom_folder": schema.StringAttribute{
+						Description: "Custom archiving folder of the business unit",
+						Optional:    true,
+						Default:     stringdefault.StaticString(""),
+						Computed:    true,
+					},
+					"encryption_certificate_policy": schema.StringAttribute{
+						Description: "Archiving certificate policy of the business unit.",
+						Optional:    true,
+						Default:     stringdefault.StaticString("default"),
+						Computed:    true,
+					},
+					"custom_encryption_certificate": schema.StringAttribute{
+						Description: "Custom encryption certificate of the business unit.",
+						Optional:    true,
+					},
+					"custom_file_size_policy": schema.StringAttribute{
+						Description: "Custom file size policy of the business unit.",
+						Optional:    true,
+						Default:     stringdefault.StaticString("default"),
+						Computed:    true,
+						Validators:  []validator.String{stringvalidator.OneOf("default", "custom")},
+					},
+					"custom_file_size": schema.Int32Attribute{
+						Description: "Custom file size for archiving of the businessunit unit.",
+						Default:     int32default.StaticInt32(0),
+						Computed:    true,
+						Optional:    true,
+						Validators:  []validator.Int32{int32validator.AtLeast(0)},
+					},
+				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"policy":                        types.StringType,
+							"folder_policy":                 types.StringType,
+							"encryption_certificate_policy": types.StringType,
+							"custom_file_size_policy":       types.StringType,
+							"custom_file_size":              types.Int32Type,
+							"policy_modifying_allowed":      types.BoolType,
+							"custom_folder":                 types.StringType,
+							"custom_encryption_certificate": types.StringType,
+						},
+						map[string]attr.Value{
+							"policy":                        types.StringValue("default"),
+							"folder_policy":                 types.StringValue("default"),
+							"encryption_certificate_policy": types.StringValue("default"),
+							"custom_file_size_policy":       types.StringValue("default"),
+							"custom_file_size":              types.Int32Value(0),
+							"policy_modifying_allowed":      types.BoolValue(false),
+							"custom_folder":                 types.StringValue(""),
+							"custom_encryption_certificate": types.StringNull(),
+						},
+					),
+				),
+			},
 		},
 	}
 }
@@ -366,6 +449,15 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	bodyData.AdHocSettings.ImplicitEnrollmentType = data.AdHocSettings.Attributes()["implicit_enrollment_type"].(types.String).ValueString()
 	bodyData.AdHocSettings.EnrollmentTemplate = data.AdHocSettings.Attributes()["enrollment_template"].(types.String).ValueString()
 	bodyData.AdHocSettings.NotificationTemplate = data.AdHocSettings.Attributes()["notification_template"].(types.String).ValueString()
+
+	bodyData.FileArchivingSettings.Policy = data.FileArchivingSettings.Attributes()["policy"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.PolicyModifyingAllowed = data.FileArchivingSettings.Attributes()["policy_modifying_allowed"].(types.Bool).ValueBool()
+	bodyData.FileArchivingSettings.FolderPolicy = data.FileArchivingSettings.Attributes()["folder_policy"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.CustomFolder = data.FileArchivingSettings.Attributes()["custom_folder"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.EncryptionCertificatePolicy = data.FileArchivingSettings.Attributes()["encryption_certificate_policy"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.CustomEncryptionCertificate = data.FileArchivingSettings.Attributes()["custom_encryption_certificate"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.CustomFileSizePolicy = data.FileArchivingSettings.Attributes()["custom_file_size_policy"].(types.String).ValueString()
+	bodyData.FileArchivingSettings.CustomFileSize = data.FileArchivingSettings.Attributes()["custom_file_size"].(types.Int32).ValueInt32()
 
 	url := "/api/v2.0/businessUnits/"
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
