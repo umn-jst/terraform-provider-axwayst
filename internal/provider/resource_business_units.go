@@ -648,16 +648,15 @@ func (r *BusinessUnitsResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	// loginName := strings.Trim(data.LoginName.String(), "\"")
-	// url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
+	url := fmt.Sprintf("/api/v2.0/businessUnits/%s/", data.Name.ValueString())
 
-	// _, _, err := r.client.GenericAPIRequest(ctx, http.MethodDelete, url, nil, []int{202, 204})
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error making API delete request",
-	// 		fmt.Sprintf("Error was: %s.", err.Error()))
-	// 	return
-	// }
+	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodDelete, url, nil, []int{204})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error making API delete request",
+			fmt.Sprintf("Error was: %s.", err.Error()))
+		return
+	}
 }
 
 func (r *BusinessUnitsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
