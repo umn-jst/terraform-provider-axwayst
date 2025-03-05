@@ -20,6 +20,7 @@ type BusinessUnitsModel struct {
 	HtmlTemplateSettings              types.Object `tfsdk:"html_template_settings"`
 	TransfersApiSettings              types.Object `tfsdk:"transfers_api_settings"`
 	AdHocSettings                     types.Object `tfsdk:"adhoc_settings"`
+	FileArchivingSettings             types.Object `tfsdk:"file_archiving_settings"`
 }
 
 type BusinessUnitsAPIModel struct {
@@ -38,6 +39,7 @@ type BusinessUnitsAPIModel struct {
 	HtmlTemplateSettings              BuHtmlTemplateSettingsAPIModel `json:"htmlTemplateSettings"`
 	TransfersApiSettings              BuTransferAPISettingsAPIModel  `json:"transfersApiSettings"`
 	AdHocSettings                     BuAdHocSettingsAPIModel        `json:"adHocSettings"`
+	FileArchivingSettings             BuFileArchiveSettingsAPIModel  `json:"fileArchivingSettings"`
 }
 
 type BuBandwidthLimitsAPIModel struct {
@@ -66,6 +68,17 @@ type BuAdHocSettingsAPIModel struct {
 	ImplicitEnrollmentType         string   `json:"implicitEnrollmentType,omitempty"`
 	EnrollmentTemplate             string   `json:"enrollmentTemplate,omitempty"`
 	NotificationTemplate           string   `json:"notificationTemplate,omitempty"`
+}
+
+type BuFileArchiveSettingsAPIModel struct {
+	Policy                      string `json:"policy"`
+	FolderPolicy                string `json:"folderPolicy"`
+	EncryptionCertificatePolicy string `json:"encryptionCertificatePolicy"`
+	CustomFileSizePolicy        string `json:"customFileSizePolicy"`
+	CustomFileSize              int32  `json:"customFileSize"`
+	PolicyModifyingAllowed      bool   `json:"policyModifyingAllowed"`
+	CustomFolder                string `json:"customFolder"`
+	CustomEncryptionCertificate string `json:"customEncryptionCertificate"`
 }
 
 type AdministratorsModel struct {
