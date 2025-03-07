@@ -21,7 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &BusinessUnitsResource{}
@@ -576,43 +575,64 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("additional_attributes"), responseData.AdditionalAttributes)...)
 	}
 
-	var bandWidthData BuBandwidthLimitsModel
-	diags := data.BandwidthLimits.As(ctx, &bandWidthData, basetypes.ObjectAsOptions{})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
+	adHocAttr = data.BandwidthLimits.Attributes()["policy"]
 
-	if !bandWidthData.Policy.IsNull() && bandWidthData.Policy != types.StringValue("default") {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.BandwidthLimits.Policy)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("policy"), responseData.BandwidthLimits.Policy)...)
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("modify_limits_allowed"), responseData.BandwidthLimits.ModifyLimitsAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("inbound_limit"), responseData.BandwidthLimits.InboundLimit)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("outbound_limit"), responseData.BandwidthLimits.OutboundLimit)...)
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("html_template_folder_path"), responseData.HtmlTemplateSettings.HtmlTemplateFolderPath)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("is_allowed_for_modifying"), responseData.HtmlTemplateSettings.IsAllowedForModifying)...)
+	adHocAttr = data.BandwidthLimits.Attributes()["modify_limits_allowed"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.BandwidthLimits.ModifyLimitsAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("modify_limits_allowed"), responseData.BandwidthLimits.ModifyLimitsAllowed)...)
+	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("transfers_web_service_allowed"), responseData.TransfersApiSettings.TransfersWebServiceAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("is_web_service_rights_modifying_allowed"), responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)...)
+	adHocAttr = data.BandwidthLimits.Attributes()["inbound_limit"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.Int32Value(responseData.BandwidthLimits.InboundLimit)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("inbound_limit"), responseData.BandwidthLimits.InboundLimit)...)
+	}
+
+	adHocAttr = data.BandwidthLimits.Attributes()["outbound_limit"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.Int32Value(responseData.BandwidthLimits.OutboundLimit)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("outbound_limit"), responseData.BandwidthLimits.OutboundLimit)...)
+	}
+
+	adHocAttr = data.HtmlTemplateSettings.Attributes()["html_template_folder_path"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.HtmlTemplateSettings.HtmlTemplateFolderPath)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("html_template_folder_path"), responseData.HtmlTemplateSettings.HtmlTemplateFolderPath)...)
+	}
+
+	adHocAttr = data.HtmlTemplateSettings.Attributes()["is_allowed_for_modifying"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.HtmlTemplateSettings.IsAllowedForModifying)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("is_allowed_for_modifying"), responseData.HtmlTemplateSettings.IsAllowedForModifying)...)
+	}
+
+	adHocAttr = data.TransfersApiSettings.Attributes()["transfers_web_service_allowed"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.TransfersApiSettings.TransfersWebServiceAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("transfers_web_service_allowed"), responseData.TransfersApiSettings.TransfersWebServiceAllowed)...)
+	}
+
+	adHocAttr = data.TransfersApiSettings.Attributes()["is_web_service_rights_modifying_allowed"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("is_web_service_rights_modifying_allowed"), responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)...)
+	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email"]
-	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmail)) {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmail)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email"), responseData.AdHocSettings.AuthByEmail)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email_modifying_allowed"]
-	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmailModifyingAllowed)) {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmailModifyingAllowed)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email_modifying_allowed"), responseData.AdHocSettings.AuthByEmailModifyingAllowed)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["delivery_method_modifying_allowed"]
-	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.DeliveryMethodModifyingAllowed)) {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.AdHocSettings.DeliveryMethodModifyingAllowed)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method_modifying_allowed"), responseData.AdHocSettings.DeliveryMethodModifyingAllowed)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["delivery_method"]
-	if !adHocAttr.IsNull() && !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.DeliveryMethod)) {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.AdHocSettings.DeliveryMethod)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method"), responseData.AdHocSettings.DeliveryMethod)...)
 	}
 
@@ -620,36 +640,74 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	setAttr, diags := types.SetValueFrom(ctx, types.StringType, adHocAttr)
 	resp.Diagnostics.Append(diags...)
 
-	if !adHocAttr.IsNull() && !types.SetNull(types.StringType).Equal(setAttr) {
+	if !adHocAttr.IsNull() && !setAttr.Equal(adHocAttr) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_types"), responseData.AdHocSettings.EnrollmentTypes)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["implicit_enrollment_type"]
-	if !adHocAttr.IsNull() && types.StringNull().ValueString() != responseData.AdHocSettings.ImplicitEnrollmentType {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.AdHocSettings.ImplicitEnrollmentType)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("implicit_enrollment_type"), responseData.AdHocSettings.ImplicitEnrollmentType)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["enrollment_template"]
-	if !adHocAttr.IsNull() && !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.EnrollmentTemplate)) {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.AdHocSettings.EnrollmentTemplate)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_template"), responseData.AdHocSettings.EnrollmentTemplate)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["notification_template"]
-	if !adHocAttr.IsNull() && types.StringNull().ValueString() != responseData.AdHocSettings.NotificationTemplate {
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.AdHocSettings.NotificationTemplate)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("notification_template"), responseData.AdHocSettings.NotificationTemplate)...)
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy"), responseData.FileArchivingSettings.Policy)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy_modifying_allowed"), responseData.FileArchivingSettings.PolicyModifyingAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("folder_policy"), responseData.FileArchivingSettings.FolderPolicy)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_folder"), responseData.FileArchivingSettings.CustomFolder)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("encryption_certificate_policy"), responseData.FileArchivingSettings.EncryptionCertificatePolicy)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_encryption_certificate"), responseData.FileArchivingSettings.CustomEncryptionCertificate)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size_policy"), responseData.FileArchivingSettings.CustomFileSizePolicy)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size"), responseData.FileArchivingSettings.CustomFileSize)...)
+	adHocAttr = data.FileArchivingSettings.Attributes()["policy"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.Policy)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy"), responseData.FileArchivingSettings.Policy)...)
+	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("policy"), responseData.LoginRestrictionSettings.Policy)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("is_policy_modifying_allowed"), responseData.LoginRestrictionSettings.IsPolicyModifyingAllowed)...)
+	adHocAttr = data.FileArchivingSettings.Attributes()["policy_modifying_allowed"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.FileArchivingSettings.PolicyModifyingAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy_modifying_allowed"), responseData.FileArchivingSettings.PolicyModifyingAllowed)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["folder_policy"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.FolderPolicy)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("folder_policy"), responseData.FileArchivingSettings.FolderPolicy)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["custom_folder"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.CustomFolder)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_folder"), responseData.FileArchivingSettings.CustomFolder)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["encryption_certificate_policy"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.EncryptionCertificatePolicy)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("encryption_certificate_policy"), responseData.FileArchivingSettings.EncryptionCertificatePolicy)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["custom_encryption_certificate"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.CustomEncryptionCertificate)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_encryption_certificate"), responseData.FileArchivingSettings.CustomEncryptionCertificate)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["custom_file_size_policy"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.FileArchivingSettings.CustomFileSizePolicy)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size_policy"), responseData.FileArchivingSettings.CustomFileSizePolicy)...)
+	}
+
+	adHocAttr = data.FileArchivingSettings.Attributes()["custom_file_size"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.Int32Value(responseData.FileArchivingSettings.CustomFileSize)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size"), responseData.FileArchivingSettings.CustomFileSize)...)
+	}
+
+	adHocAttr = data.LoginRestrictionSettings.Attributes()["policy"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.StringValue(responseData.LoginRestrictionSettings.Policy)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("policy"), responseData.LoginRestrictionSettings.Policy)...)
+	}
+
+	adHocAttr = data.LoginRestrictionSettings.Attributes()["is_policy_modifying_allowed"]
+	if !adHocAttr.IsNull() && !adHocAttr.Equal(types.BoolValue(responseData.LoginRestrictionSettings.IsPolicyModifyingAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("is_policy_modifying_allowed"), responseData.LoginRestrictionSettings.IsPolicyModifyingAllowed)...)
+	}
 }
 
 func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
