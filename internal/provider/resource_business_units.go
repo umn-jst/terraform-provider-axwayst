@@ -597,10 +597,6 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("policy"), responseData.LoginRestrictionSettings.Policy)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("is_policy_modifying_allowed"), responseData.LoginRestrictionSettings.IsPolicyModifyingAllowed)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
