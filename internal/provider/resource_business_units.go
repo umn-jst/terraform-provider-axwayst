@@ -538,61 +538,52 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), responseData.LoginName)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("role_name"), responseData.RoleName)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("is_limited"), responseData.IsLimited)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("local_authentication"), responseData.LocalAuthentication)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dual_authentication"), responseData.DualAuthentication)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("locked"), responseData.Locked)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("business_units"), responseData.BusinessUnits)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), responseData.Name)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder"), responseData.BaseFolder)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("parent"), responseData.Parent)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("business_unit_hierarchy"), responseData.BusinessUnitHierarchy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder_modifying_allowed"), responseData.BaseFolderModifyingAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("home_folder_modifying_allowed"), responseData.HomeFolderModifyingAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dmz"), responseData.DMZ)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("enabled_icap_servers"), responseData.EnabledIcapServers)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("shared_folders_collaboration_allowed"), responseData.SharedFoldersCollaborationAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("additional_attributes"), responseData.AdditionalAttributes)...)
 
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("password_credentials").AtName("password_expired"), responseData.PasswordCredentials.PasswordExpired)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("policy"), responseData.BandwidthLimits.Policy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("modify_limits_allowed"), responseData.BandwidthLimits.ModifyLimitsAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("inbound_limit"), responseData.BandwidthLimits.InboundLimit)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("outbound_limit"), responseData.BandwidthLimits.OutboundLimit)...)
 
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_read_only"), responseData.AdministratorRights.CanReadOnly)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("is_maker"), responseData.AdministratorRights.IsMaker)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("is_checker"), responseData.AdministratorRights.IsChecker)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_create_users"), responseData.AdministratorRights.CanCreateUsers)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_update_users"), responseData.AdministratorRights.CanUpdateUsers)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_access_help_desk"), responseData.AdministratorRights.CanAccessHelpDesk)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_see_full_audit_log"), responseData.AdministratorRights.CanSeeFullAuditLog)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_administrators"), responseData.AdministratorRights.CanManageAdministrators)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_applications"), responseData.AdministratorRights.CanManageApplications)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_shared_folders"), responseData.AdministratorRights.CanManageSharedFolders)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_business_units"), responseData.AdministratorRights.CanManageBusinessUnits)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_route_templates"), responseData.AdministratorRights.CanManageRouteTemplates)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_external_script_step"), responseData.AdministratorRights.CanManageExternalScriptStep)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_external_script_root_execution"), responseData.AdministratorRights.CanManageExternalScriptRootExecution)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_login_restriction_policies"), responseData.AdministratorRights.CanManageLoginRestrictionPolicies)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("administrator_rights").AtName("can_manage_icap_settings"), responseData.AdministratorRights.CanManageIcapSettings)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("html_template_folder_path"), responseData.HtmlTemplateSettings.HtmlTemplateFolderPath)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("html_template_settings").AtName("is_allowed_for_modifying"), responseData.HtmlTemplateSettings.IsAllowedForModifying)...)
 
-	// if !(data.CertificateDn.IsNull() && responseData.CertificateDn == "") {
-	// 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("certificate_dn"), responseData.CertificateDn)...)
-	// 	if resp.Diagnostics.HasError() {
-	// 		return
-	// 	}
-	// }
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("transfers_web_service_allowed"), responseData.TransfersApiSettings.TransfersWebServiceAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("is_web_service_rights_modifying_allowed"), responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)...)
 
-	// if !(data.Parent.IsNull() && responseData.Parent == "") {
-	// 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("parent"), responseData.Parent)...)
-	// 	if resp.Diagnostics.HasError() {
-	// 		return
-	// 	}
-	// }
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email"), responseData.AdHocSettings.AuthByEmail)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email_modifying_allowed"), responseData.AdHocSettings.AuthByEmailModifyingAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method_modifying_allowed"), responseData.AdHocSettings.DeliveryMethodModifyingAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method"), responseData.AdHocSettings.DeliveryMethod)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_types"), responseData.AdHocSettings.EnrollmentTypes)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("implicit_enrollment_type"), responseData.AdHocSettings.ImplicitEnrollmentType)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_template"), responseData.AdHocSettings.EnrollmentTemplate)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("notification_template"), responseData.AdHocSettings.NotificationTemplate)...)
 
-	// if !(data.FullCreationPath.IsNull() && responseData.FullCreationPath == "") {
-	// 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("full_creation_path"), responseData.FullCreationPath)...)
-	// 	if resp.Diagnostics.HasError() {
-	// 		return
-	// 	}
-	// }
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy"), responseData.FileArchivingSettings.Policy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy_modifying_allowed"), responseData.FileArchivingSettings.PolicyModifyingAllowed)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("folder_policy"), responseData.FileArchivingSettings.FolderPolicy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_folder"), responseData.FileArchivingSettings.CustomFolder)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("encryption_certificate_policy"), responseData.FileArchivingSettings.EncryptionCertificatePolicy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_encryption_certificate"), responseData.FileArchivingSettings.CustomEncryptionCertificate)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size_policy"), responseData.FileArchivingSettings.CustomFileSizePolicy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("custom_file_size"), responseData.FileArchivingSettings.CustomFileSize)...)
 
-	// // Always use current state of password to set resp.State as responseData.Password will not be valid
-	// var statePassword types.String
-	// diags := req.State.GetAttribute(ctx, path.Root("password_credentials").AtName("password"), &statePassword)
-	// if diags.HasError() {
-	// 	return
-	// }
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("password_credentials").AtName("password"), statePassword)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("policy"), responseData.LoginRestrictionSettings.Policy)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login_restriction_settings").AtName("is_policy_modifying_allowed"), responseData.LoginRestrictionSettings.IsPolicyModifyingAllowed)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
