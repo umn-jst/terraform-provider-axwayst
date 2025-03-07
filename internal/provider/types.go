@@ -27,11 +27,11 @@ type BusinessUnitsModel struct {
 type BusinessUnitsAPIModel struct {
 	Name                              string                             `json:"name"`
 	BaseFolder                        string                             `json:"baseFolder"`
-	Parent                            string                             `json:"parent"`
+	Parent                            string                             `json:"parent,omitempty"`
 	BusinessUnitHierarchy             string                             `json:"businessUnitHierarchy"`
 	BaseFolderModifyingAllowed        bool                               `json:"baseFolderModifyingAllowed"`
 	HomeFolderModifyingAllowed        bool                               `json:"homeFolderModifyingAllowed"`
-	DMZ                               string                             `json:"dmz"`
+	DMZ                               string                             `json:"dmz,omitempty"`
 	ManagedByCG                       bool                               `json:"managedByCG"`
 	EnabledIcapServers                []string                           `json:"enabledIcapServers,omitempty"`
 	AdditionalAttributes              map[string]string                  `json:"additionalAttributes,omitempty"`

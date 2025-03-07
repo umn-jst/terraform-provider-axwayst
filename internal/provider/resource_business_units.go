@@ -15,8 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -57,6 +59,9 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 				Optional:    true,
 				Computed:    true,
 				Description: "The full path hierarchy of the business unit entity.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"base_folder_modifying_allowed": schema.BoolAttribute{
 				Optional:    true,
@@ -540,13 +545,25 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), responseData.Name)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder"), responseData.BaseFolder)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("parent"), responseData.Parent)...)
+
+	if !data.Parent.IsNull() || responseData.Parent != types.StringNull().ValueString() {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("parent"), responseData.Parent)...)
+	}
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("business_unit_hierarchy"), responseData.BusinessUnitHierarchy)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder_modifying_allowed"), responseData.BaseFolderModifyingAllowed)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("home_folder_modifying_allowed"), responseData.HomeFolderModifyingAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dmz"), responseData.DMZ)...)
+
+	if !data.DMZ.IsNull() || responseData.DMZ != types.StringNull().ValueString() {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dmz"), responseData.DMZ)...)
+	}
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("enabled_icap_servers"), responseData.EnabledIcapServers)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("shared_folders_collaboration_allowed"), responseData.SharedFoldersCollaborationAllowed)...)
+
+	if !data.SharedFoldersCollaborationAllowed.IsNull() || responseData.SharedFoldersCollaborationAllowed != types.BoolNull().ValueBool() {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("shared_folders_collaboration_allowed"), responseData.SharedFoldersCollaborationAllowed)...)
+	}
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("additional_attributes"), responseData.AdditionalAttributes)...)
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("policy"), responseData.BandwidthLimits.Policy)...)
