@@ -207,6 +207,9 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 			"adhoc_settings": schema.SingleNestedAttribute{
 				Optional: true,
 				Computed: true,
+				// PlanModifiers: []planmodifier.Object{
+				// 	objectplanmodifier.UseStateForUnknown(),
+				// },
 				Attributes: map[string]schema.Attribute{
 					"auth_by_email": schema.BoolAttribute{
 						Description: "Flag indicating if auth is by email",
@@ -543,6 +546,8 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
+	var adHocAttr attr.Value
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), responseData.Name)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder"), responseData.BaseFolder)...)
 
@@ -577,14 +582,48 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("transfers_web_service_allowed"), responseData.TransfersApiSettings.TransfersWebServiceAllowed)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("is_web_service_rights_modifying_allowed"), responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)...)
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email"), responseData.AdHocSettings.AuthByEmail)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email_modifying_allowed"), responseData.AdHocSettings.AuthByEmailModifyingAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method_modifying_allowed"), responseData.AdHocSettings.DeliveryMethodModifyingAllowed)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method"), responseData.AdHocSettings.DeliveryMethod)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_types"), responseData.AdHocSettings.EnrollmentTypes)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("implicit_enrollment_type"), responseData.AdHocSettings.ImplicitEnrollmentType)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_template"), responseData.AdHocSettings.EnrollmentTemplate)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("notification_template"), responseData.AdHocSettings.NotificationTemplate)...)
+	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email"]
+	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmail)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email"), responseData.AdHocSettings.AuthByEmail)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email_modifying_allowed"]
+	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmailModifyingAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email_modifying_allowed"), responseData.AdHocSettings.AuthByEmailModifyingAllowed)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["delivery_method_modifying_allowed"]
+	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.DeliveryMethodModifyingAllowed)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method_modifying_allowed"), responseData.AdHocSettings.DeliveryMethodModifyingAllowed)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["delivery_method"]
+	if !adHocAttr.IsNull() || !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.DeliveryMethod)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method"), responseData.AdHocSettings.DeliveryMethod)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["enrollment_types"]
+	setAttr, diags := types.SetValueFrom(ctx, types.StringType, adHocAttr)
+	resp.Diagnostics.Append(diags...)
+
+	if !adHocAttr.IsNull() || !types.SetNull(types.StringType).Equal(setAttr) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_types"), responseData.AdHocSettings.EnrollmentTypes)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["implicit_enrollment_type"]
+	if !adHocAttr.IsNull() || types.StringNull().ValueString() != responseData.AdHocSettings.ImplicitEnrollmentType {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("implicit_enrollment_type"), responseData.AdHocSettings.ImplicitEnrollmentType)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["enrollment_template"]
+	if !adHocAttr.IsNull() || !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.EnrollmentTemplate)) {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_template"), responseData.AdHocSettings.EnrollmentTemplate)...)
+	}
+
+	adHocAttr = data.AdHocSettings.Attributes()["notification_template"]
+	if !adHocAttr.IsNull() || types.StringNull().ValueString() != responseData.AdHocSettings.NotificationTemplate {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("notification_template"), responseData.AdHocSettings.NotificationTemplate)...)
+	}
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy"), responseData.FileArchivingSettings.Policy)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("file_archiving_settings").AtName("policy_modifying_allowed"), responseData.FileArchivingSettings.PolicyModifyingAllowed)...)
