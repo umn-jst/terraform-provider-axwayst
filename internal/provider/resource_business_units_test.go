@@ -98,13 +98,17 @@ func TestAccBusinessUnits(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"axwayst_business_units.test1",
 						tfjsonpath.New("additional_attributes"),
-						knownvalue.MapExact(map[string]knownvalue.Check{}),
+						// knownvalue.MapExact(map[string]knownvalue.Check{}),
+						knownvalue.Null(),
 					),
 					statecheck.ExpectKnownValue(
 						"axwayst_business_units.test1",
 						tfjsonpath.New("bandwidth_limits"),
 						knownvalue.ObjectExact(map[string]knownvalue.Check{
-							"policy": knownvalue.StringExact("default"),
+							"policy":                knownvalue.StringExact("default"),
+							"modify_limits_allowed": knownvalue.Null(),
+							"inbound_limit":         knownvalue.Null(),
+							"outbound_limit":        knownvalue.Null(),
 						}),
 					),
 					statecheck.ExpectKnownValue(
@@ -119,6 +123,7 @@ func TestAccBusinessUnits(t *testing.T) {
 						"axwayst_business_units.test1",
 						tfjsonpath.New("transfers_api_settings"),
 						knownvalue.ObjectExact(map[string]knownvalue.Check{
+							"transfers_web_service_allowed":           knownvalue.Null(),
 							"is_web_service_rights_modifying_allowed": knownvalue.Bool(false),
 						}),
 					),
@@ -130,8 +135,10 @@ func TestAccBusinessUnits(t *testing.T) {
 							"auth_by_email_modifying_allowed":   knownvalue.Bool(false),
 							"delivery_method_modifying_allowed": knownvalue.Bool(false),
 							"delivery_method":                   knownvalue.StringExact("DEFAULT"),
-							"enrollment_types":                  knownvalue.SetExact([]knownvalue.Check{}),
+							"enrollment_types":                  knownvalue.Null(),
 							"enrollment_template":               knownvalue.StringExact("default"),
+							"implicit_enrollment_type":          knownvalue.Null(),
+							"notification_template":             knownvalue.Null(),
 						}),
 					),
 					statecheck.ExpectKnownValue(
@@ -143,6 +150,7 @@ func TestAccBusinessUnits(t *testing.T) {
 							"folder_policy":                 knownvalue.StringExact("default"),
 							"custom_folder":                 knownvalue.StringExact(""),
 							"encryption_certificate_policy": knownvalue.StringExact("default"),
+							"custom_encryption_certificate": knownvalue.Null(),
 							"custom_file_size_policy":       knownvalue.StringExact("default"),
 							"custom_file_size":              knownvalue.Int32Exact(0),
 						}),
@@ -151,6 +159,7 @@ func TestAccBusinessUnits(t *testing.T) {
 						"axwayst_business_units.test1",
 						tfjsonpath.New("login_restriction_settings"),
 						knownvalue.ObjectExact(map[string]knownvalue.Check{
+							"policy":                      knownvalue.Null(),
 							"is_policy_modifying_allowed": knownvalue.Bool(false),
 						}),
 					),
