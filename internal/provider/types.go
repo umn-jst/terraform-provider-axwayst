@@ -51,6 +51,13 @@ type BuBandwidthLimitsAPIModel struct {
 	OutboundLimit       int32  `json:"outboundLimit,omitempty"`
 }
 
+type BuBandwidthLimitsModel struct {
+	Policy              types.String `tfsdk:"policy"`
+	ModifyLimitsAllowed types.Bool   `tfsdk:"modify_limits_allowed"`
+	InboundLimit        types.Int32  `tfsdk:"inbound_limit"`
+	OutboundLimit       types.Int32  `tfsdk:"outbound_limit"`
+}
+
 type BuHtmlTemplateSettingsAPIModel struct {
 	HtmlTemplateFolderPath string `json:"htmlTemplateFolderPath"`
 	IsAllowedForModifying  bool   `json:"isAllowedForModifying"`

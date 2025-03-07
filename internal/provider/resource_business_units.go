@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &BusinessUnitsResource{}
@@ -103,6 +104,8 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 				Optional:    true,
 				ElementType: types.StringType,
 				Description: `Additional attributes which are defined with "key": "value" pairs. Keys must start with "userVars." prefix, follow the pattern: [a-zA-Z0-9_.]+ and have length between 10 and 255 characters (including the prefix). Non prefixed part of key should not start with "userVars.", since it is a reserved word. Both key and value cannot be blank.`,
+				// Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+				// Computed:    true,
 			},
 			"bandwidth_limits": schema.SingleNestedAttribute{
 				Optional: true,
@@ -551,7 +554,7 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), responseData.Name)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder"), responseData.BaseFolder)...)
 
-	if !data.Parent.IsNull() || responseData.Parent != types.StringNull().ValueString() {
+	if !data.Parent.IsNull() && responseData.Parent != types.StringNull().ValueString() {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("parent"), responseData.Parent)...)
 	}
 
@@ -559,19 +562,30 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("base_folder_modifying_allowed"), responseData.BaseFolderModifyingAllowed)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("home_folder_modifying_allowed"), responseData.HomeFolderModifyingAllowed)...)
 
-	if !data.DMZ.IsNull() || responseData.DMZ != types.StringNull().ValueString() {
+	if !data.DMZ.IsNull() && responseData.DMZ != types.StringNull().ValueString() {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dmz"), responseData.DMZ)...)
 	}
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("enabled_icap_servers"), responseData.EnabledIcapServers)...)
 
-	if !data.SharedFoldersCollaborationAllowed.IsNull() || responseData.SharedFoldersCollaborationAllowed != types.BoolNull().ValueBool() {
+	if !data.SharedFoldersCollaborationAllowed.IsNull() && responseData.SharedFoldersCollaborationAllowed != types.BoolNull().ValueBool() {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("shared_folders_collaboration_allowed"), responseData.SharedFoldersCollaborationAllowed)...)
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("additional_attributes"), responseData.AdditionalAttributes)...)
+	if !data.AdditionalAttributes.IsNull() && len(responseData.AdditionalAttributes) > 0 {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("additional_attributes"), responseData.AdditionalAttributes)...)
+	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("policy"), responseData.BandwidthLimits.Policy)...)
+	var bandWidthData BuBandwidthLimitsModel
+	diags := data.BandwidthLimits.As(ctx, &bandWidthData, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if !bandWidthData.Policy.IsNull() && bandWidthData.Policy != types.StringValue("default") {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("policy"), responseData.BandwidthLimits.Policy)...)
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("modify_limits_allowed"), responseData.BandwidthLimits.ModifyLimitsAllowed)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("inbound_limit"), responseData.BandwidthLimits.InboundLimit)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bandwidth_limits").AtName("outbound_limit"), responseData.BandwidthLimits.OutboundLimit)...)
@@ -583,22 +597,22 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("transfers_api_settings").AtName("is_web_service_rights_modifying_allowed"), responseData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed)...)
 
 	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email"]
-	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmail)) {
+	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmail)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email"), responseData.AdHocSettings.AuthByEmail)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["auth_by_email_modifying_allowed"]
-	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmailModifyingAllowed)) {
+	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.AuthByEmailModifyingAllowed)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("auth_by_email_modifying_allowed"), responseData.AdHocSettings.AuthByEmailModifyingAllowed)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["delivery_method_modifying_allowed"]
-	if !adHocAttr.IsNull() || !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.DeliveryMethodModifyingAllowed)) {
+	if !adHocAttr.IsNull() && !types.BoolNull().Equal(types.BoolValue(responseData.AdHocSettings.DeliveryMethodModifyingAllowed)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method_modifying_allowed"), responseData.AdHocSettings.DeliveryMethodModifyingAllowed)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["delivery_method"]
-	if !adHocAttr.IsNull() || !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.DeliveryMethod)) {
+	if !adHocAttr.IsNull() && !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.DeliveryMethod)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("delivery_method"), responseData.AdHocSettings.DeliveryMethod)...)
 	}
 
@@ -606,22 +620,22 @@ func (r *BusinessUnitsResource) Read(ctx context.Context, req resource.ReadReque
 	setAttr, diags := types.SetValueFrom(ctx, types.StringType, adHocAttr)
 	resp.Diagnostics.Append(diags...)
 
-	if !adHocAttr.IsNull() || !types.SetNull(types.StringType).Equal(setAttr) {
+	if !adHocAttr.IsNull() && !types.SetNull(types.StringType).Equal(setAttr) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_types"), responseData.AdHocSettings.EnrollmentTypes)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["implicit_enrollment_type"]
-	if !adHocAttr.IsNull() || types.StringNull().ValueString() != responseData.AdHocSettings.ImplicitEnrollmentType {
+	if !adHocAttr.IsNull() && types.StringNull().ValueString() != responseData.AdHocSettings.ImplicitEnrollmentType {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("implicit_enrollment_type"), responseData.AdHocSettings.ImplicitEnrollmentType)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["enrollment_template"]
-	if !adHocAttr.IsNull() || !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.EnrollmentTemplate)) {
+	if !adHocAttr.IsNull() && !types.StringNull().Equal(types.StringValue(responseData.AdHocSettings.EnrollmentTemplate)) {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("enrollment_template"), responseData.AdHocSettings.EnrollmentTemplate)...)
 	}
 
 	adHocAttr = data.AdHocSettings.Attributes()["notification_template"]
-	if !adHocAttr.IsNull() || types.StringNull().ValueString() != responseData.AdHocSettings.NotificationTemplate {
+	if !adHocAttr.IsNull() && types.StringNull().ValueString() != responseData.AdHocSettings.NotificationTemplate {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("adhoc_settings").AtName("notification_template"), responseData.AdHocSettings.NotificationTemplate)...)
 	}
 
