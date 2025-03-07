@@ -98,7 +98,6 @@ func TestAccBusinessUnits(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"axwayst_business_units.test1",
 						tfjsonpath.New("additional_attributes"),
-						// knownvalue.MapExact(map[string]knownvalue.Check{}),
 						knownvalue.Null(),
 					),
 					statecheck.ExpectKnownValue(
