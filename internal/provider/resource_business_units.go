@@ -438,7 +438,7 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	bodyData.DMZ = data.DMZ.ValueString()
 	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
 
-	additionalAttr := make(map[string]string, len(data.AdditionalAttributes.Elements()))
+	var additionalAttr map[string]string
 	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &additionalAttr, false)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -448,7 +448,7 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 		bodyData.AdditionalAttributes = additionalAttr
 	}
 
-	icapServers := make([]string, 0, len(data.EnabledIcapServers.Elements()))
+	var icapServers []string
 	resp.Diagnostics.Append(data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -791,7 +791,7 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 	bodyData.AdHocSettings.EnrollmentTemplate = adhocSettings.EnrollmentTemplate.ValueString()
 	bodyData.AdHocSettings.NotificationTemplate = adhocSettings.NotificationTemplate.ValueString()
 
-	enrlTypes := make([]string, len(adhocSettings.EnrollmentTypes.Elements()))
+	var enrlTypes []string
 	resp.Diagnostics.Append(adhocSettings.EnrollmentTypes.ElementsAs(ctx, &enrlTypes, false)...)
 	if resp.Diagnostics.HasError() {
 		return
