@@ -19,6 +19,7 @@ type AxwaySTClient struct {
 	auth     string
 }
 
+// Used by the resource_business_units.go in the Create() and Update() functions to move data from a TF object to a JSON object.
 func (c *AxwaySTClient) BusinessUnitDataPopulate(ctx context.Context, data BusinessUnitsModel) (bodyData BusinessUnitsAPIModel, diags diag.Diagnostics) {
 
 	bodyData.Name = data.Name.ValueString()
