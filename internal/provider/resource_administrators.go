@@ -278,58 +278,10 @@ func (r *AdministratorsResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	var bodyData AdministratorsAPIModel
-
-	bodyData.LoginName = data.LoginName.ValueString()
-	bodyData.RoleName = data.RoleName.ValueString()
-	bodyData.IsLimited = data.IsLimited.ValueBool()
-	bodyData.LocalAuthentication = data.LocalAuthentication.ValueBool()
-	bodyData.DualAuthentication = data.DualAuthentication.ValueBool()
-	bodyData.Locked = data.Locked.ValueBool()
-
-	bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
-	bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
-
-	bodyData.AdministratorRights.CanReadOnly = data.AdministratorRights.Attributes()["can_read_only"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.IsMaker = data.AdministratorRights.Attributes()["is_maker"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.IsChecker = data.AdministratorRights.Attributes()["is_checker"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanCreateUsers = data.AdministratorRights.Attributes()["can_create_users"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanUpdateUsers = data.AdministratorRights.Attributes()["can_update_users"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanAccessHelpDesk = data.AdministratorRights.Attributes()["can_access_help_desk"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanSeeFullAuditLog = data.AdministratorRights.Attributes()["can_see_full_audit_log"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageAdministrators = data.AdministratorRights.Attributes()["can_manage_administrators"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageApplications = data.AdministratorRights.Attributes()["can_manage_applications"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageSharedFolders = data.AdministratorRights.Attributes()["can_manage_shared_folders"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageBusinessUnits = data.AdministratorRights.Attributes()["can_manage_business_units"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageRouteTemplates = data.AdministratorRights.Attributes()["can_manage_route_templates"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageExternalScriptStep = data.AdministratorRights.Attributes()["can_manage_external_script_step"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageExternalScriptRootExecution = data.AdministratorRights.Attributes()["can_manage_external_script_root_execution"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageLoginRestrictionPolicies = data.AdministratorRights.Attributes()["can_manage_login_restriction_policies"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageIcapSettings = data.AdministratorRights.Attributes()["can_manage_icap_settings"].(types.Bool).ValueBool()
-
-	if len(data.BusinessUnits.Elements()) == 0 {
-		bodyData.BusinessUnits = []string{}
-	} else {
-		for _, element := range data.BusinessUnits.Elements() {
-			if str, ok := element.(types.String); ok {
-				bodyData.BusinessUnits = append(bodyData.BusinessUnits, str.ValueString())
-			} else {
-				resp.Diagnostics.AddError(
-					"Error converting BusinessUnit elements to string",
-					fmt.Sprintf("Business units set: %v.", data.BusinessUnits))
-				return
-			}
-		}
-	}
-
-	if !(data.CertificateDn.IsNull()) {
-		bodyData.CertificateDn = data.CertificateDn.ValueString()
-	}
-	if !(data.Parent.IsNull()) {
-		bodyData.Parent = data.Parent.ValueString()
-	}
-	if !(data.FullCreationPath.IsNull()) {
-		bodyData.FullCreationPath = data.FullCreationPath.ValueString()
+	bodyData, diag := r.client.AdministratorsDataPopulate(ctx, data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
 	}
 
 	url := "/api/v2.0/administrators/"
@@ -442,58 +394,10 @@ func (r *AdministratorsResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	var bodyData AdministratorsAPIModel
-
-	bodyData.LoginName = data.LoginName.ValueString()
-	bodyData.RoleName = data.RoleName.ValueString()
-	bodyData.IsLimited = data.IsLimited.ValueBool()
-	bodyData.LocalAuthentication = data.LocalAuthentication.ValueBool()
-	bodyData.DualAuthentication = data.DualAuthentication.ValueBool()
-	bodyData.Locked = data.Locked.ValueBool()
-
-	bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
-	bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
-
-	bodyData.AdministratorRights.CanReadOnly = data.AdministratorRights.Attributes()["can_read_only"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.IsMaker = data.AdministratorRights.Attributes()["is_maker"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.IsChecker = data.AdministratorRights.Attributes()["is_checker"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanCreateUsers = data.AdministratorRights.Attributes()["can_create_users"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanUpdateUsers = data.AdministratorRights.Attributes()["can_update_users"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanAccessHelpDesk = data.AdministratorRights.Attributes()["can_access_help_desk"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanSeeFullAuditLog = data.AdministratorRights.Attributes()["can_see_full_audit_log"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageAdministrators = data.AdministratorRights.Attributes()["can_manage_administrators"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageApplications = data.AdministratorRights.Attributes()["can_manage_applications"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageSharedFolders = data.AdministratorRights.Attributes()["can_manage_shared_folders"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageBusinessUnits = data.AdministratorRights.Attributes()["can_manage_business_units"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageRouteTemplates = data.AdministratorRights.Attributes()["can_manage_route_templates"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageExternalScriptStep = data.AdministratorRights.Attributes()["can_manage_external_script_step"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageExternalScriptRootExecution = data.AdministratorRights.Attributes()["can_manage_external_script_root_execution"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageLoginRestrictionPolicies = data.AdministratorRights.Attributes()["can_manage_login_restriction_policies"].(types.Bool).ValueBool()
-	bodyData.AdministratorRights.CanManageIcapSettings = data.AdministratorRights.Attributes()["can_manage_icap_settings"].(types.Bool).ValueBool()
-
-	if len(data.BusinessUnits.Elements()) == 0 {
-		bodyData.BusinessUnits = []string{}
-	} else {
-		for _, element := range data.BusinessUnits.Elements() {
-			if str, ok := element.(types.String); ok {
-				bodyData.BusinessUnits = append(bodyData.BusinessUnits, str.ValueString())
-			} else {
-				resp.Diagnostics.AddError(
-					"Error converting BusinessUnit elements to string",
-					fmt.Sprintf("Business units set: %v.", data.BusinessUnits))
-				return
-			}
-		}
-	}
-
-	if !(data.CertificateDn.IsNull()) {
-		bodyData.CertificateDn = data.CertificateDn.ValueString()
-	}
-	if !(data.Parent.IsNull()) {
-		bodyData.Parent = data.Parent.ValueString()
-	}
-	if !(data.FullCreationPath.IsNull()) {
-		bodyData.FullCreationPath = data.FullCreationPath.ValueString()
+	bodyData, diag := r.client.AdministratorsDataPopulate(ctx, data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
 	}
 
 	url := fmt.Sprintf("/api/v2.0/administrators/%s/", data.LoginName.ValueString())

@@ -47,9 +47,9 @@ func (c *AxwaySTClient) BusinessUnitDataPopulate(ctx context.Context, data Busin
 		return
 	}
 
-	if len(icapServers) > 0 {
-		bodyData.EnabledIcapServers = icapServers
-	}
+	// if len(icapServers) > 0 {
+	bodyData.EnabledIcapServers = icapServers
+	// }
 
 	var bandwidthData BuBandwidthLimitsModel
 	diags = data.BandwidthLimits.As(ctx, &bandwidthData, basetypes.ObjectAsOptions{})
@@ -129,6 +129,70 @@ func (c *AxwaySTClient) BusinessUnitDataPopulate(ctx context.Context, data Busin
 
 	bodyData.LoginRestrictionSettings.Policy = loginRestrictions.Policy.ValueString()
 	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = loginRestrictions.IsPolicyModifyingAllowed.ValueBool()
+
+	return
+}
+
+// Used by the resource_administrators.go in the Create() and Update() functions to move data from a TF object to a JSON object.
+func (c *AxwaySTClient) AdministratorsDataPopulate(ctx context.Context, data AdministratorsModel) (bodyData AdministratorsAPIModel, diags diag.Diagnostics) {
+
+	bodyData.LoginName = data.LoginName.ValueString()
+	bodyData.RoleName = data.RoleName.ValueString()
+	bodyData.IsLimited = data.IsLimited.ValueBool()
+	bodyData.LocalAuthentication = data.LocalAuthentication.ValueBool()
+	bodyData.DualAuthentication = data.DualAuthentication.ValueBool()
+	bodyData.Locked = data.Locked.ValueBool()
+	// if !(data.Parent.IsNull()) {
+	bodyData.Parent = data.Parent.ValueString()
+	// }
+	// if !(data.CertificateDn.IsNull()) {
+	bodyData.CertificateDn = data.CertificateDn.ValueString()
+	// }
+
+	// if !(data.FullCreationPath.IsNull()) {
+	bodyData.FullCreationPath = data.FullCreationPath.ValueString()
+	// }
+
+	var businessUnits []string
+	diags = data.BusinessUnits.ElementsAs(ctx, &businessUnits, false)
+	if diags.HasError() {
+		return
+	}
+	bodyData.BusinessUnits = businessUnits
+
+	var passCreds AdministratorsPasswordCredentialModel
+
+	diags = data.PasswordCredentials.As(ctx, &passCreds, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.PasswordCredentials.Password = passCreds.Password.ValueString()
+	bodyData.PasswordCredentials.PasswordExpired = passCreds.PasswordExpired.ValueBool()
+
+	var adminRights AdministratorsRightsModel
+
+	diags = data.AdministratorRights.As(ctx, &adminRights, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.AdministratorRights.CanReadOnly = adminRights.CanReadOnly.ValueBool()
+	bodyData.AdministratorRights.IsMaker = adminRights.IsMaker.ValueBool()
+	bodyData.AdministratorRights.IsChecker = adminRights.IsChecker.ValueBool()
+	bodyData.AdministratorRights.CanCreateUsers = adminRights.CanCreateUsers.ValueBool()
+	bodyData.AdministratorRights.CanUpdateUsers = adminRights.CanUpdateUsers.ValueBool()
+	bodyData.AdministratorRights.CanAccessHelpDesk = adminRights.CanAccessHelpDesk.ValueBool()
+	bodyData.AdministratorRights.CanSeeFullAuditLog = adminRights.CanSeeFullAuditLog.ValueBool()
+	bodyData.AdministratorRights.CanManageAdministrators = adminRights.CanManageAdministrators.ValueBool()
+	bodyData.AdministratorRights.CanManageApplications = adminRights.CanManageApplications.ValueBool()
+	bodyData.AdministratorRights.CanManageSharedFolders = adminRights.CanManageSharedFolders.ValueBool()
+	bodyData.AdministratorRights.CanManageBusinessUnits = adminRights.CanManageBusinessUnits.ValueBool()
+	bodyData.AdministratorRights.CanManageRouteTemplates = adminRights.CanManageRouteTemplates.ValueBool()
+	bodyData.AdministratorRights.CanManageExternalScriptStep = adminRights.CanManageExternalScriptStep.ValueBool()
+	bodyData.AdministratorRights.CanManageExternalScriptRootExecution = adminRights.CanManageExternalScriptRootExecution.ValueBool()
+	bodyData.AdministratorRights.CanManageLoginRestrictionPolicies = adminRights.CanManageLoginRestrictionPolicies.ValueBool()
+	bodyData.AdministratorRights.CanManageIcapSettings = adminRights.CanManageIcapSettings.ValueBool()
 
 	return
 }

@@ -150,14 +150,14 @@ type AdministratorsModel struct {
 type AdministratorsAPIModel struct {
 	AdministratorRights AdministratorsRightsAPIModel             `json:"administratorRights"`
 	BusinessUnits       []string                                 `json:"businessUnits"`
-	CertificateDn       string                                   `json:"certificateDN"`
+	CertificateDn       string                                   `json:"certificateDN,omitempty"`
 	DualAuthentication  bool                                     `json:"dualAuthentication"`
-	FullCreationPath    string                                   `json:"fullCreationPath"`
+	FullCreationPath    string                                   `json:"fullCreationPath,omitempty"`
 	IsLimited           bool                                     `json:"isLimited"`
 	LocalAuthentication bool                                     `json:"localAuthentication"`
 	Locked              bool                                     `json:"locked"`
 	LoginName           string                                   `json:"loginName"`
-	Parent              string                                   `json:"parent"`
+	Parent              string                                   `json:"parent,omitempty"`
 	PasswordCredentials AdministratorsPasswordCredentialAPIModel `json:"passwordCredentials"`
 	RoleName            string                                   `json:"roleName"`
 }
@@ -165,6 +165,11 @@ type AdministratorsAPIModel struct {
 type AdministratorsPasswordCredentialAPIModel struct {
 	Password        string `json:"password"`
 	PasswordExpired bool   `json:"passwordExpired"`
+}
+
+type AdministratorsPasswordCredentialModel struct {
+	Password        types.String `tfsdk:"password"`
+	PasswordExpired types.Bool   `tfsdk:"password_expired"`
 }
 
 type AdministratorsRightsAPIModel struct {
@@ -184,4 +189,23 @@ type AdministratorsRightsAPIModel struct {
 	CanManageExternalScriptRootExecution bool `json:"canManageExternalScriptRootExecution"`
 	CanManageLoginRestrictionPolicies    bool `json:"canManageLoginRestrictionPolicies"`
 	CanManageIcapSettings                bool `json:"canManageIcapSettings"`
+}
+
+type AdministratorsRightsModel struct {
+	CanReadOnly                          types.Bool `tfsdk:"can_read_only"`
+	IsMaker                              types.Bool `tfsdk:"is_maker"`
+	IsChecker                            types.Bool `tfsdk:"is_checker"`
+	CanCreateUsers                       types.Bool `tfsdk:"can_create_users"`
+	CanUpdateUsers                       types.Bool `tfsdk:"can_update_users"`
+	CanAccessHelpDesk                    types.Bool `tfsdk:"can_access_help_desk"`
+	CanSeeFullAuditLog                   types.Bool `tfsdk:"can_see_full_audit_log"`
+	CanManageAdministrators              types.Bool `tfsdk:"can_manage_administrators"`
+	CanManageApplications                types.Bool `tfsdk:"can_manage_applications"`
+	CanManageSharedFolders               types.Bool `tfsdk:"can_manage_shared_folders"`
+	CanManageBusinessUnits               types.Bool `tfsdk:"can_manage_business_units"`
+	CanManageRouteTemplates              types.Bool `tfsdk:"can_manage_route_templates"`
+	CanManageExternalScriptStep          types.Bool `tfsdk:"can_manage_external_script_step"`
+	CanManageExternalScriptRootExecution types.Bool `tfsdk:"can_manage_external_script_root_execution"`
+	CanManageLoginRestrictionPolicies    types.Bool `tfsdk:"can_manage_login_restriction_policies"`
+	CanManageIcapSettings                types.Bool `tfsdk:"can_manage_icap_settings"`
 }
