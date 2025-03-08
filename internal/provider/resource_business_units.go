@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &BusinessUnitsResource{}
@@ -718,69 +719,128 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	// var bodyData BusinessUnitsAPIModel
+	var bodyData BusinessUnitsAPIModel
 
-	// bodyData.LoginName = data.LoginName.ValueString()
-	// bodyData.RoleName = data.RoleName.ValueString()
-	// bodyData.IsLimited = data.IsLimited.ValueBool()
-	// bodyData.LocalAuthentication = data.LocalAuthentication.ValueBool()
-	// bodyData.DualAuthentication = data.DualAuthentication.ValueBool()
-	// bodyData.Locked = data.Locked.ValueBool()
+	bodyData.Name = data.Name.ValueString()
+	bodyData.BaseFolder = data.BaseFolder.ValueString()
+	bodyData.Parent = data.Parent.ValueString()
+	bodyData.BusinessUnitHierarchy = data.BusinessUnitHierarchy.ValueString()
+	bodyData.BaseFolderModifyingAllowed = data.BaseFolderModifyingAllowed.ValueBool()
+	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
+	bodyData.DMZ = data.DMZ.ValueString()
+	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
 
-	// bodyData.PasswordCredentials.Password = data.PasswordCredentials.Attributes()["password"].(types.String).ValueString()
-	// bodyData.PasswordCredentials.PasswordExpired = data.PasswordCredentials.Attributes()["password_expired"].(types.Bool).ValueBool()
+	if len(data.EnabledIcapServers.Elements()) == 0 {
+		bodyData.EnabledIcapServers = []string{}
+	} else {
+		for _, element := range data.EnabledIcapServers.Elements() {
+			if str, ok := element.(types.String); ok {
+				bodyData.EnabledIcapServers = append(bodyData.EnabledIcapServers, str.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error converting EnabledIcapServers elements to string",
+					fmt.Sprintf("Business units set: %v.", data.EnabledIcapServers))
+				return
+			}
+		}
+	}
 
-	// bodyData.AdministratorRights.CanReadOnly = data.AdministratorRights.Attributes()["can_read_only"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.IsMaker = data.AdministratorRights.Attributes()["is_maker"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.IsChecker = data.AdministratorRights.Attributes()["is_checker"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanCreateUsers = data.AdministratorRights.Attributes()["can_create_users"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanUpdateUsers = data.AdministratorRights.Attributes()["can_update_users"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanAccessHelpDesk = data.AdministratorRights.Attributes()["can_access_help_desk"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanSeeFullAuditLog = data.AdministratorRights.Attributes()["can_see_full_audit_log"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageAdministrators = data.AdministratorRights.Attributes()["can_manage_administrators"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageApplications = data.AdministratorRights.Attributes()["can_manage_applications"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageSharedFolders = data.AdministratorRights.Attributes()["can_manage_shared_folders"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageBusinessUnits = data.AdministratorRights.Attributes()["can_manage_business_units"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageRouteTemplates = data.AdministratorRights.Attributes()["can_manage_route_templates"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageExternalScriptStep = data.AdministratorRights.Attributes()["can_manage_external_script_step"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageExternalScriptRootExecution = data.AdministratorRights.Attributes()["can_manage_external_script_root_execution"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageLoginRestrictionPolicies = data.AdministratorRights.Attributes()["can_manage_login_restriction_policies"].(types.Bool).ValueBool()
-	// bodyData.AdministratorRights.CanManageIcapSettings = data.AdministratorRights.Attributes()["can_manage_icap_settings"].(types.Bool).ValueBool()
+	addtlAttrbtMap := make(map[string]string)
+	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &addtlAttrbtMap, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	bodyData.AdditionalAttributes = addtlAttrbtMap
 
-	// if len(data.BusinessUnits.Elements()) == 0 {
-	// 	bodyData.BusinessUnits = []string{}
-	// } else {
-	// 	for _, element := range data.BusinessUnits.Elements() {
-	// 		if str, ok := element.(types.String); ok {
-	// 			bodyData.BusinessUnits = append(bodyData.BusinessUnits, str.ValueString())
-	// 		} else {
-	// 			resp.Diagnostics.AddError(
-	// 				"Error converting BusinessUnit elements to string",
-	// 				fmt.Sprintf("Business units set: %v.", data.BusinessUnits))
-	// 			return
-	// 		}
-	// 	}
-	// }
+	bodyData.SharedFoldersCollaborationAllowed = data.SharedFoldersCollaborationAllowed.ValueBool()
 
-	// if !(data.CertificateDn.IsNull()) {
-	// 	bodyData.CertificateDn = data.CertificateDn.ValueString()
-	// }
-	// if !(data.Parent.IsNull()) {
-	// 	bodyData.Parent = data.Parent.ValueString()
-	// }
-	// if !(data.FullCreationPath.IsNull()) {
-	// 	bodyData.FullCreationPath = data.FullCreationPath.ValueString()
-	// }
+	var bandwidthData BuBandwidthLimitsModel
 
-	// loginName := strings.Trim(data.LoginName.String(), "\"")
-	// url := fmt.Sprintf("/api/v2.0/administrators/%s/", loginName)
-	// _, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error making API update request",
-	// 		fmt.Sprintf("Error was: %s.", err.Error()))
-	// 	return
-	// }
+	resp.Diagnostics.Append(data.BandwidthLimits.As(ctx, &bandwidthData, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	bodyData.BandwidthLimits.Policy = bandwidthData.Policy.ValueString()
+	bodyData.BandwidthLimits.ModifyLimitsAllowed = bandwidthData.ModifyLimitsAllowed.ValueBool()
+	bodyData.BandwidthLimits.InboundLimit = bandwidthData.InboundLimit.ValueInt32()
+	bodyData.BandwidthLimits.OutboundLimit = bandwidthData.OutboundLimit.ValueInt32()
+
+	var htmlSettings BuHtmlTemplateSettingsModel
+
+	resp.Diagnostics.Append(data.HtmlTemplateSettings.As(ctx, &htmlSettings, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.HtmlTemplateSettings.HtmlTemplateFolderPath = htmlSettings.HtmlTemplateFolderPath.ValueString()
+	bodyData.HtmlTemplateSettings.IsAllowedForModifying = htmlSettings.IsAllowedForModifying.ValueBool()
+
+	var transferAPISettings BuTransferAPISettingsModel
+
+	resp.Diagnostics.Append(data.TransfersApiSettings.As(ctx, &transferAPISettings, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = transferAPISettings.TransfersWebServiceAllowed.ValueBool()
+	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = transferAPISettings.IsWebServiceRightsModifyingAllowed.ValueBool()
+
+	var adhocSettings BuAdHocSettingsModel
+
+	resp.Diagnostics.Append(data.AdHocSettings.As(ctx, &adhocSettings, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.AdHocSettings.AuthByEmail = adhocSettings.AuthByEmail.ValueBool()
+	bodyData.AdHocSettings.AuthByEmailModifyingAllowed = adhocSettings.AuthByEmailModifyingAllowed.ValueBool()
+	bodyData.AdHocSettings.DeliveryMethodModifyingAllowed = adhocSettings.DeliveryMethodModifyingAllowed.ValueBool()
+	bodyData.AdHocSettings.DeliveryMethod = adhocSettings.DeliveryMethod.ValueString()
+	bodyData.AdHocSettings.ImplicitEnrollmentType = adhocSettings.ImplicitEnrollmentType.ValueString()
+	bodyData.AdHocSettings.EnrollmentTemplate = adhocSettings.EnrollmentTemplate.ValueString()
+	bodyData.AdHocSettings.NotificationTemplate = adhocSettings.NotificationTemplate.ValueString()
+
+	enrlTypes := make([]string, len(adhocSettings.EnrollmentTypes.Elements()))
+	resp.Diagnostics.Append(adhocSettings.EnrollmentTypes.ElementsAs(ctx, &enrlTypes, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	bodyData.AdHocSettings.EnrollmentTypes = enrlTypes
+
+	var fileArchiveSettings BuFileArchiveSettingsModel
+
+	resp.Diagnostics.Append(data.FileArchivingSettings.As(ctx, &fileArchiveSettings, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.FileArchivingSettings.Policy = fileArchiveSettings.Policy.ValueString()
+	bodyData.FileArchivingSettings.FolderPolicy = fileArchiveSettings.FolderPolicy.ValueString()
+	bodyData.FileArchivingSettings.EncryptionCertificatePolicy = fileArchiveSettings.EncryptionCertificatePolicy.ValueString()
+	bodyData.FileArchivingSettings.CustomFileSizePolicy = fileArchiveSettings.CustomFileSizePolicy.ValueString()
+	bodyData.FileArchivingSettings.CustomFileSize = fileArchiveSettings.CustomFileSize.ValueInt32()
+	bodyData.FileArchivingSettings.PolicyModifyingAllowed = fileArchiveSettings.PolicyModifyingAllowed.ValueBool()
+	bodyData.FileArchivingSettings.CustomFolder = fileArchiveSettings.CustomFolder.ValueString()
+	bodyData.FileArchivingSettings.CustomEncryptionCertificate = fileArchiveSettings.CustomEncryptionCertificate.ValueString()
+
+	var loginRestrictions BuLoginRestrictionSettingsModel
+
+	resp.Diagnostics.Append(data.LoginRestrictionSettings.As(ctx, &loginRestrictions, basetypes.ObjectAsOptions{})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bodyData.LoginRestrictionSettings.Policy = loginRestrictions.Policy.ValueString()
+	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = loginRestrictions.IsPolicyModifyingAllowed.ValueBool()
+
+	url := fmt.Sprintf("/api/v2.0/businessUnits/%s/", data.Name.ValueString())
+	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error making API update request",
+			fmt.Sprintf("Error was: %s.", err.Error()))
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

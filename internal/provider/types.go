@@ -51,14 +51,31 @@ type BuBandwidthLimitsAPIModel struct {
 	OutboundLimit       int32  `json:"outboundLimit,omitempty"`
 }
 
+type BuBandwidthLimitsModel struct {
+	Policy              types.String `tfsdk:"policy"`
+	ModifyLimitsAllowed types.Bool   `tfsdk:"modify_limits_allowed"`
+	InboundLimit        types.Int32  `tfsdk:"inbound_limit"`
+	OutboundLimit       types.Int32  `tfsdk:"outbound_limit"`
+}
+
 type BuHtmlTemplateSettingsAPIModel struct {
 	HtmlTemplateFolderPath string `json:"htmlTemplateFolderPath"`
 	IsAllowedForModifying  bool   `json:"isAllowedForModifying"`
 }
 
+type BuHtmlTemplateSettingsModel struct {
+	HtmlTemplateFolderPath types.String `tfsdk:"html_template_folder_path"`
+	IsAllowedForModifying  types.Bool   `tfsdk:"is_allowed_for_modifying"`
+}
+
 type BuTransferAPISettingsAPIModel struct {
 	TransfersWebServiceAllowed         bool `json:"transfersWebServiceAllowed"`
 	IsWebServiceRightsModifyingAllowed bool `json:"isWebServiceRightsModifyingAllowed"`
+}
+
+type BuTransferAPISettingsModel struct {
+	TransfersWebServiceAllowed         types.Bool `tfsdk:"transfers_web_service_allowed"`
+	IsWebServiceRightsModifyingAllowed types.Bool `tfsdk:"is_web_service_rights_modifying_allowed"`
 }
 
 type BuAdHocSettingsAPIModel struct {
@@ -72,6 +89,17 @@ type BuAdHocSettingsAPIModel struct {
 	NotificationTemplate           string   `json:"notificationTemplate,omitempty"`
 }
 
+type BuAdHocSettingsModel struct {
+	AuthByEmail                    types.Bool   `tfsdk:"auth_by_email"`
+	AuthByEmailModifyingAllowed    types.Bool   `tfsdk:"auth_by_email_modifying_allowed"`
+	DeliveryMethodModifyingAllowed types.Bool   `tfsdk:"delivery_method_modifying_allowed"`
+	DeliveryMethod                 types.String `tfsdk:"delivery_method"`
+	EnrollmentTypes                types.Set    `tfsdk:"enrollment_types"`
+	ImplicitEnrollmentType         types.String `tfsdk:"implicit_enrollment_type"`
+	EnrollmentTemplate             types.String `tfsdk:"enrollment_template"`
+	NotificationTemplate           types.String `tfsdk:"notification_template"`
+}
+
 type BuFileArchiveSettingsAPIModel struct {
 	Policy                      string `json:"policy,omitempty"`
 	FolderPolicy                string `json:"folderPolicy,omitempty"`
@@ -83,9 +111,25 @@ type BuFileArchiveSettingsAPIModel struct {
 	CustomEncryptionCertificate string `json:"customEncryptionCertificate,omitempty"`
 }
 
+type BuFileArchiveSettingsModel struct {
+	Policy                      types.String `tfsdk:"policy"`
+	FolderPolicy                types.String `tfsdk:"folder_policy"`
+	EncryptionCertificatePolicy types.String `tfsdk:"encryption_certificate_policy"`
+	CustomFileSizePolicy        types.String `tfsdk:"custom_file_size_policy"`
+	CustomFileSize              types.Int32  `tfsdk:"custom_file_size"`
+	PolicyModifyingAllowed      types.Bool   `tfsdk:"policy_modifying_allowed"`
+	CustomFolder                types.String `tfsdk:"custom_folder"`
+	CustomEncryptionCertificate types.String `tfsdk:"custom_encryption_certificate"`
+}
+
 type BuLoginRestrictionSettingsAPIModel struct {
 	Policy                   string `json:"policy,omitempty"`
 	IsPolicyModifyingAllowed bool   `json:"isPolicyModifyingAllowed,omitempty"`
+}
+
+type BuLoginRestrictionSettingsModel struct {
+	Policy                   types.String `tfsdk:"policy"`
+	IsPolicyModifyingAllowed types.Bool   `tfsdk:"is_policy_modifying_allowed"`
 }
 
 type AdministratorsModel struct {
