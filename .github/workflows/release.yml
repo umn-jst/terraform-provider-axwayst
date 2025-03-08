@@ -25,12 +25,23 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+
+      - name: Install GPG
+        run: sudo apt-get update && sudo apt-get install -y gnupg
+  
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@cb9bde2e2525e640591a934b1fd28eef1dcaf5e5 # v6.2.0
-        id: import_gpg
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE"
+
+      - name: Export GPG fingerprint
+        id: gpg-fingerprint
+        run: |
+          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep 'sec' | awk '{print $2}' | cut -d'/' -f2 | xargs -I {} gpg --fingerprint {} | grep 'Key fingerprint' | awk '{print $4$5$6$7$8$9$10}')
+          echo "::set-output name=fingerprint::$FINGERPRINT"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
         with:
@@ -38,4 +49,4 @@ jobs:
         env:
           # GitHub sets the GITHUB_TOKEN secret automatically.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GPG_FINGERPRINT: ${{ steps.gpg-fingerprint.outputs.fingerprint }}
