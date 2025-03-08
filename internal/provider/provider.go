@@ -45,15 +45,15 @@ func (p *axwaystProvider) Schema(ctx context.Context, req provider.SchemaRequest
 		Description: "Provider for Axway Secure Transport",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
-				Description: "URL for Axway ST Admin (i.e. https://axway.example.com:8444). This can be omitted if you set an envrionment variable named AXWAYST_HOST.",
+				Description: "URL for Axway ST Admin (i.e. https://axway.example.com:8444). This can be omitted if you set an environment variable named AXWAYST_HOST.",
 				Optional:    true,
 			},
 			"username": schema.StringAttribute{
-				Description: "Axway ST username. This can be omitted if you set an envrionment variable named AXWAYST_USERNAME.",
+				Description: "Axway ST username. This can be omitted if you set an environment variable named AXWAYST_USERNAME.",
 				Optional:    true,
 			},
 			"password": schema.StringAttribute{
-				Description: "Axway ST password. This can be omitted if you set an envrionment variable named AXWAYST_PASSWORD.",
+				Description: "Axway ST password. This can be omitted if you set an environment variable named AXWAYST_PASSWORD.",
 				Optional:    true,
 			},
 		},

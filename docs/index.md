@@ -37,6 +37,6 @@ provider "awx" {
 
 ### Optional
 
-- `endpoint` (String) URL for Axway ST Admin (i.e. https://axway.example.com:8444). This can be omitted if you set an envrionment variable named AXWAYST_HOST.
-- `password` (String) Axway ST password. This can be omitted if you set an envrionment variable named AXWAYST_PASSWORD.
-- `username` (String) Axway ST username. This can be omitted if you set an envrionment variable named AXWAYST_USERNAME.
+- `endpoint` (String) URL for Axway ST Admin (i.e. https://axway.example.com:8444). This can be omitted if you set an environment variable named AXWAYST_HOST.
+- `password` (String) Axway ST password. This can be omitted if you set an environment variable named AXWAYST_PASSWORD.
+- `username` (String) Axway ST username. This can be omitted if you set an environment variable named AXWAYST_USERNAME.
