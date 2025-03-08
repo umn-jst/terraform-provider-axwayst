@@ -21,7 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &BusinessUnitsResource{}
@@ -427,115 +426,11 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	var bodyData BusinessUnitsAPIModel
-
-	bodyData.Name = data.Name.ValueString()
-	bodyData.BaseFolder = data.BaseFolder.ValueString()
-	bodyData.Parent = data.Parent.ValueString()
-	bodyData.BusinessUnitHierarchy = data.BusinessUnitHierarchy.ValueString()
-	bodyData.BaseFolderModifyingAllowed = data.BaseFolderModifyingAllowed.ValueBool()
-	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
-	bodyData.DMZ = data.DMZ.ValueString()
-	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
-
-	var additionalAttr map[string]string
-	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &additionalAttr, false)...)
-	if resp.Diagnostics.HasError() {
+	bodyData, diag := r.client.BusinessUnitDataPopulate(ctx, data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
 		return
 	}
-
-	if len(additionalAttr) > 0 {
-		bodyData.AdditionalAttributes = additionalAttr
-	}
-
-	var icapServers []string
-	resp.Diagnostics.Append(data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if len(icapServers) > 0 {
-		bodyData.EnabledIcapServers = icapServers
-	}
-
-	var bandwidthData BuBandwidthLimitsModel
-	resp.Diagnostics.Append(data.BandwidthLimits.As(ctx, &bandwidthData, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.BandwidthLimits.Policy = bandwidthData.Policy.ValueString()
-	bodyData.BandwidthLimits.ModifyLimitsAllowed = bandwidthData.ModifyLimitsAllowed.ValueBool()
-	bodyData.BandwidthLimits.InboundLimit = bandwidthData.InboundLimit.ValueInt32()
-	bodyData.BandwidthLimits.OutboundLimit = bandwidthData.OutboundLimit.ValueInt32()
-
-	var htmlSettings BuHtmlTemplateSettingsModel
-
-	resp.Diagnostics.Append(data.HtmlTemplateSettings.As(ctx, &htmlSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.HtmlTemplateSettings.HtmlTemplateFolderPath = htmlSettings.HtmlTemplateFolderPath.ValueString()
-	bodyData.HtmlTemplateSettings.IsAllowedForModifying = htmlSettings.IsAllowedForModifying.ValueBool()
-
-	var transferAPISettings BuTransferAPISettingsModel
-
-	resp.Diagnostics.Append(data.TransfersApiSettings.As(ctx, &transferAPISettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = transferAPISettings.TransfersWebServiceAllowed.ValueBool()
-	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = transferAPISettings.IsWebServiceRightsModifyingAllowed.ValueBool()
-
-	var adhocSettings BuAdHocSettingsModel
-
-	resp.Diagnostics.Append(data.AdHocSettings.As(ctx, &adhocSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.AdHocSettings.AuthByEmail = adhocSettings.AuthByEmail.ValueBool()
-	bodyData.AdHocSettings.AuthByEmailModifyingAllowed = adhocSettings.AuthByEmailModifyingAllowed.ValueBool()
-	bodyData.AdHocSettings.DeliveryMethodModifyingAllowed = adhocSettings.DeliveryMethodModifyingAllowed.ValueBool()
-	bodyData.AdHocSettings.DeliveryMethod = adhocSettings.DeliveryMethod.ValueString()
-	bodyData.AdHocSettings.ImplicitEnrollmentType = adhocSettings.ImplicitEnrollmentType.ValueString()
-	bodyData.AdHocSettings.EnrollmentTemplate = adhocSettings.EnrollmentTemplate.ValueString()
-	bodyData.AdHocSettings.NotificationTemplate = adhocSettings.NotificationTemplate.ValueString()
-
-	var enrlTypes []string
-	resp.Diagnostics.Append(adhocSettings.EnrollmentTypes.ElementsAs(ctx, &enrlTypes, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	bodyData.AdHocSettings.EnrollmentTypes = enrlTypes
-
-	var fileArchiveSettings BuFileArchiveSettingsModel
-
-	resp.Diagnostics.Append(data.FileArchivingSettings.As(ctx, &fileArchiveSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.FileArchivingSettings.Policy = fileArchiveSettings.Policy.ValueString()
-	bodyData.FileArchivingSettings.FolderPolicy = fileArchiveSettings.FolderPolicy.ValueString()
-	bodyData.FileArchivingSettings.EncryptionCertificatePolicy = fileArchiveSettings.EncryptionCertificatePolicy.ValueString()
-	bodyData.FileArchivingSettings.CustomFileSizePolicy = fileArchiveSettings.CustomFileSizePolicy.ValueString()
-	bodyData.FileArchivingSettings.CustomFileSize = fileArchiveSettings.CustomFileSize.ValueInt32()
-	bodyData.FileArchivingSettings.PolicyModifyingAllowed = fileArchiveSettings.PolicyModifyingAllowed.ValueBool()
-	bodyData.FileArchivingSettings.CustomFolder = fileArchiveSettings.CustomFolder.ValueString()
-	bodyData.FileArchivingSettings.CustomEncryptionCertificate = fileArchiveSettings.CustomEncryptionCertificate.ValueString()
-
-	var loginRestrictions BuLoginRestrictionSettingsModel
-
-	resp.Diagnostics.Append(data.LoginRestrictionSettings.As(ctx, &loginRestrictions, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.LoginRestrictionSettings.Policy = loginRestrictions.Policy.ValueString()
-	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = loginRestrictions.IsPolicyModifyingAllowed.ValueBool()
 
 	url := "/api/v2.0/businessUnits/"
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
@@ -756,112 +651,11 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	var bodyData BusinessUnitsAPIModel
-
-	bodyData.Name = data.Name.ValueString()
-	bodyData.BaseFolder = data.BaseFolder.ValueString()
-	bodyData.Parent = data.Parent.ValueString()
-	bodyData.BusinessUnitHierarchy = data.BusinessUnitHierarchy.ValueString()
-	bodyData.BaseFolderModifyingAllowed = data.BaseFolderModifyingAllowed.ValueBool()
-	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
-	bodyData.DMZ = data.DMZ.ValueString()
-	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
-
-	var icapServers []string
-	resp.Diagnostics.Append(data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)...)
-	if resp.Diagnostics.HasError() {
+	bodyData, diag := r.client.BusinessUnitDataPopulate(ctx, data)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
 		return
 	}
-
-	bodyData.EnabledIcapServers = icapServers
-
-	var addtlAttrbtMap map[string]string
-	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &addtlAttrbtMap, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	bodyData.AdditionalAttributes = addtlAttrbtMap
-
-	bodyData.SharedFoldersCollaborationAllowed = data.SharedFoldersCollaborationAllowed.ValueBool()
-
-	var bandwidthData BuBandwidthLimitsModel
-
-	resp.Diagnostics.Append(data.BandwidthLimits.As(ctx, &bandwidthData, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	bodyData.BandwidthLimits.Policy = bandwidthData.Policy.ValueString()
-	bodyData.BandwidthLimits.ModifyLimitsAllowed = bandwidthData.ModifyLimitsAllowed.ValueBool()
-	bodyData.BandwidthLimits.InboundLimit = bandwidthData.InboundLimit.ValueInt32()
-	bodyData.BandwidthLimits.OutboundLimit = bandwidthData.OutboundLimit.ValueInt32()
-
-	var htmlSettings BuHtmlTemplateSettingsModel
-
-	resp.Diagnostics.Append(data.HtmlTemplateSettings.As(ctx, &htmlSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.HtmlTemplateSettings.HtmlTemplateFolderPath = htmlSettings.HtmlTemplateFolderPath.ValueString()
-	bodyData.HtmlTemplateSettings.IsAllowedForModifying = htmlSettings.IsAllowedForModifying.ValueBool()
-
-	var transferAPISettings BuTransferAPISettingsModel
-
-	resp.Diagnostics.Append(data.TransfersApiSettings.As(ctx, &transferAPISettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = transferAPISettings.TransfersWebServiceAllowed.ValueBool()
-	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = transferAPISettings.IsWebServiceRightsModifyingAllowed.ValueBool()
-
-	var adhocSettings BuAdHocSettingsModel
-
-	resp.Diagnostics.Append(data.AdHocSettings.As(ctx, &adhocSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.AdHocSettings.AuthByEmail = adhocSettings.AuthByEmail.ValueBool()
-	bodyData.AdHocSettings.AuthByEmailModifyingAllowed = adhocSettings.AuthByEmailModifyingAllowed.ValueBool()
-	bodyData.AdHocSettings.DeliveryMethodModifyingAllowed = adhocSettings.DeliveryMethodModifyingAllowed.ValueBool()
-	bodyData.AdHocSettings.DeliveryMethod = adhocSettings.DeliveryMethod.ValueString()
-	bodyData.AdHocSettings.ImplicitEnrollmentType = adhocSettings.ImplicitEnrollmentType.ValueString()
-	bodyData.AdHocSettings.EnrollmentTemplate = adhocSettings.EnrollmentTemplate.ValueString()
-	bodyData.AdHocSettings.NotificationTemplate = adhocSettings.NotificationTemplate.ValueString()
-
-	var enrlTypes []string
-	resp.Diagnostics.Append(adhocSettings.EnrollmentTypes.ElementsAs(ctx, &enrlTypes, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	bodyData.AdHocSettings.EnrollmentTypes = enrlTypes
-
-	var fileArchiveSettings BuFileArchiveSettingsModel
-
-	resp.Diagnostics.Append(data.FileArchivingSettings.As(ctx, &fileArchiveSettings, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.FileArchivingSettings.Policy = fileArchiveSettings.Policy.ValueString()
-	bodyData.FileArchivingSettings.FolderPolicy = fileArchiveSettings.FolderPolicy.ValueString()
-	bodyData.FileArchivingSettings.EncryptionCertificatePolicy = fileArchiveSettings.EncryptionCertificatePolicy.ValueString()
-	bodyData.FileArchivingSettings.CustomFileSizePolicy = fileArchiveSettings.CustomFileSizePolicy.ValueString()
-	bodyData.FileArchivingSettings.CustomFileSize = fileArchiveSettings.CustomFileSize.ValueInt32()
-	bodyData.FileArchivingSettings.PolicyModifyingAllowed = fileArchiveSettings.PolicyModifyingAllowed.ValueBool()
-	bodyData.FileArchivingSettings.CustomFolder = fileArchiveSettings.CustomFolder.ValueString()
-	bodyData.FileArchivingSettings.CustomEncryptionCertificate = fileArchiveSettings.CustomEncryptionCertificate.ValueString()
-
-	var loginRestrictions BuLoginRestrictionSettingsModel
-
-	resp.Diagnostics.Append(data.LoginRestrictionSettings.As(ctx, &loginRestrictions, basetypes.ObjectAsOptions{})...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bodyData.LoginRestrictionSettings.Policy = loginRestrictions.Policy.ValueString()
-	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = loginRestrictions.IsPolicyModifyingAllowed.ValueBool()
 
 	url := fmt.Sprintf("/api/v2.0/businessUnits/%s/", data.Name.ValueString())
 	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
