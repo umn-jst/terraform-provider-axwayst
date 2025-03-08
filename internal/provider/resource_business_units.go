@@ -104,8 +104,6 @@ func (r *BusinessUnitsResource) Schema(ctx context.Context, req resource.SchemaR
 				Optional:    true,
 				ElementType: types.StringType,
 				Description: `Additional attributes which are defined with "key": "value" pairs. Keys must start with "userVars." prefix, follow the pattern: [a-zA-Z0-9_.]+ and have length between 10 and 255 characters (including the prefix). Non prefixed part of key should not start with "userVars.", since it is a reserved word. Both key and value cannot be blank.`,
-				// Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
-				// Computed:    true,
 			},
 			"bandwidth_limits": schema.SingleNestedAttribute{
 				Optional: true,
@@ -730,22 +728,15 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 	bodyData.DMZ = data.DMZ.ValueString()
 	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
 
-	if len(data.EnabledIcapServers.Elements()) == 0 {
-		bodyData.EnabledIcapServers = []string{}
-	} else {
-		for _, element := range data.EnabledIcapServers.Elements() {
-			if str, ok := element.(types.String); ok {
-				bodyData.EnabledIcapServers = append(bodyData.EnabledIcapServers, str.ValueString())
-			} else {
-				resp.Diagnostics.AddError(
-					"Error converting EnabledIcapServers elements to string",
-					fmt.Sprintf("Business units set: %v.", data.EnabledIcapServers))
-				return
-			}
-		}
+	var icapServers []string
+	resp.Diagnostics.Append(data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
-	addtlAttrbtMap := make(map[string]string)
+	bodyData.EnabledIcapServers = icapServers
+
+	var addtlAttrbtMap map[string]string
 	resp.Diagnostics.Append(data.AdditionalAttributes.ElementsAs(ctx, &addtlAttrbtMap, false)...)
 	if resp.Diagnostics.HasError() {
 		return
