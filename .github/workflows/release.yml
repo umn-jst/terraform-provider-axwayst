@@ -34,7 +34,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
         run: |
-          export GPG_TTY=$(tty); echo "$GPG_PRIVATE_KEY" | gpg --batch --import --yes --passphrase "$GPG_PASSPHRASE"
+           echo "$GPG_PRIVATE_KEY" | GPG_TTY=$(tty) gpg --import --yes --passphrase "$GPG_PASSPHRASE"
 
       - name: Export GPG fingerprint
         id: gpg-fingerprint
