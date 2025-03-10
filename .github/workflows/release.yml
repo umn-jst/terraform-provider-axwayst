@@ -27,20 +27,20 @@ jobs:
           cache: true
 
       - name: Install GPG
-        run: sudo apt-get update && sudo apt-get install -y gnupg
+        run: sudo apt-get update && sudo apt-get install -y gnupg sed
   
       - name: Import GPG key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
         run: |
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE"
+          export GPG_TTY=$(tty); echo "$GPG_PRIVATE_KEY" | gpg --batch --import --yes --passphrase "$GPG_PASSPHRASE"
 
       - name: Export GPG fingerprint
         id: gpg-fingerprint
         run: |
-          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep 'sec' | awk '{print $2}' | cut -d'/' -f2 | xargs -I {} gpg --fingerprint {} | grep 'Key fingerprint' | awk '{print $4$5$6$7$8$9$10}')
-          echo "::set-output name=fingerprint::$FINGERPRINT"
+          gpg_output=$(gpg --list-keys --fingerprint terraform-provider-axwayst | grep -A 1 "pub" | grep -v "pub" | sed 's/[ \t]//g')
+          echo "gpg_key=$gpg_output" >> $GITHUB_OUTPUT
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
@@ -49,4 +49,4 @@ jobs:
         env:
           # GitHub sets the GITHUB_TOKEN secret automatically.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_FINGERPRINT: ${{ steps.gpg-fingerprint.outputs.fingerprint }}
+          GPG_FINGERPRINT: ${{ steps.gpg-fingerprint.outputs.gpg_key }}
