@@ -278,7 +278,7 @@ func (r *AdministratorsResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	bodyData, diag := r.client.AdministratorsDataPopulate(ctx, data)
+	bodyData, diag := administratorsDataPopulate(ctx, data)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
 		return
@@ -394,7 +394,7 @@ func (r *AdministratorsResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	bodyData, diag := r.client.AdministratorsDataPopulate(ctx, data)
+	bodyData, diag := administratorsDataPopulate(ctx, data)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
 		return
