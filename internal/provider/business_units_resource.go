@@ -426,7 +426,7 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	bodyData, diag := r.client.BusinessUnitDataPopulate(ctx, data)
+	bodyData, diag := businessUnitDataPopulate(ctx, data)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
 		return
@@ -651,7 +651,7 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	bodyData, diag := r.client.BusinessUnitDataPopulate(ctx, data)
+	bodyData, diag := businessUnitDataPopulate(ctx, data)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
 		return

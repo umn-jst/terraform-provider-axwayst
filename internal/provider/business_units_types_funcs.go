@@ -1,7 +1,11 @@
 package provider
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type BusinessUnitsModel struct {
@@ -132,80 +136,116 @@ type BuLoginRestrictionSettingsModel struct {
 	IsPolicyModifyingAllowed types.Bool   `tfsdk:"is_policy_modifying_allowed"`
 }
 
-type AdministratorsModel struct {
-	AdministratorRights types.Object `tfsdk:"administrator_rights"`
-	BusinessUnits       types.Set    `tfsdk:"business_units"`
-	CertificateDn       types.String `tfsdk:"certificate_dn"`
-	DualAuthentication  types.Bool   `tfsdk:"dual_authentication"`
-	FullCreationPath    types.String `tfsdk:"full_creation_path"`
-	IsLimited           types.Bool   `tfsdk:"is_limited"`
-	LocalAuthentication types.Bool   `tfsdk:"local_authentication"`
-	Locked              types.Bool   `tfsdk:"locked"`
-	LoginName           types.String `tfsdk:"id"`
-	Parent              types.String `tfsdk:"parent"`
-	PasswordCredentials types.Object `tfsdk:"password_credentials"`
-	RoleName            types.String `tfsdk:"role_name"`
-}
+// Used by the resource_business_units.go in the Create() and Update() functions to move data from a TF object to a JSON object.
+func businessUnitDataPopulate(ctx context.Context, data BusinessUnitsModel) (bodyData BusinessUnitsAPIModel, diags diag.Diagnostics) {
 
-type AdministratorsAPIModel struct {
-	AdministratorRights AdministratorsRightsAPIModel             `json:"administratorRights"`
-	BusinessUnits       []string                                 `json:"businessUnits"`
-	CertificateDn       string                                   `json:"certificateDN,omitempty"`
-	DualAuthentication  bool                                     `json:"dualAuthentication"`
-	FullCreationPath    string                                   `json:"fullCreationPath,omitempty"`
-	IsLimited           bool                                     `json:"isLimited"`
-	LocalAuthentication bool                                     `json:"localAuthentication"`
-	Locked              bool                                     `json:"locked"`
-	LoginName           string                                   `json:"loginName"`
-	Parent              string                                   `json:"parent,omitempty"`
-	PasswordCredentials AdministratorsPasswordCredentialAPIModel `json:"passwordCredentials"`
-	RoleName            string                                   `json:"roleName"`
-}
+	bodyData.Name = data.Name.ValueString()
+	bodyData.BaseFolder = data.BaseFolder.ValueString()
+	bodyData.Parent = data.Parent.ValueString()
+	bodyData.BusinessUnitHierarchy = data.BusinessUnitHierarchy.ValueString()
+	bodyData.BaseFolderModifyingAllowed = data.BaseFolderModifyingAllowed.ValueBool()
+	bodyData.HomeFolderModifyingAllowed = data.HomeFolderModifyingAllowed.ValueBool()
+	bodyData.DMZ = data.DMZ.ValueString()
+	bodyData.ManagedByCG = data.ManagedByCG.ValueBool()
 
-type AdministratorsPasswordCredentialAPIModel struct {
-	Password        string `json:"password"`
-	PasswordExpired bool   `json:"passwordExpired"`
-}
+	var additionalAttr map[string]string
+	diags = data.AdditionalAttributes.ElementsAs(ctx, &additionalAttr, false)
+	if diags.HasError() {
+		return
+	}
 
-type AdministratorsPasswordCredentialModel struct {
-	Password        types.String `tfsdk:"password"`
-	PasswordExpired types.Bool   `tfsdk:"password_expired"`
-}
+	if len(additionalAttr) > 0 {
+		bodyData.AdditionalAttributes = additionalAttr
+	}
 
-type AdministratorsRightsAPIModel struct {
-	CanReadOnly                          bool `json:"canReadOnly"`
-	IsMaker                              bool `json:"isMaker"`
-	IsChecker                            bool `json:"isChecker"`
-	CanCreateUsers                       bool `json:"canCreateUsers"`
-	CanUpdateUsers                       bool `json:"canUpdateUsers"`
-	CanAccessHelpDesk                    bool `json:"canAccessHelpDesk"`
-	CanSeeFullAuditLog                   bool `json:"canSeeFullAuditLog"`
-	CanManageAdministrators              bool `json:"canManageAdministrators"`
-	CanManageApplications                bool `json:"canManageApplications"`
-	CanManageSharedFolders               bool `json:"canManageSharedFolders"`
-	CanManageBusinessUnits               bool `json:"canManageBusinessUnits"`
-	CanManageRouteTemplates              bool `json:"canManageRouteTemplates"`
-	CanManageExternalScriptStep          bool `json:"canManageExternalScriptStep"`
-	CanManageExternalScriptRootExecution bool `json:"canManageExternalScriptRootExecution"`
-	CanManageLoginRestrictionPolicies    bool `json:"canManageLoginRestrictionPolicies"`
-	CanManageIcapSettings                bool `json:"canManageIcapSettings"`
-}
+	var icapServers []string
+	diags = data.EnabledIcapServers.ElementsAs(ctx, &icapServers, false)
+	if diags.HasError() {
+		return
+	}
 
-type AdministratorsRightsModel struct {
-	CanReadOnly                          types.Bool `tfsdk:"can_read_only"`
-	IsMaker                              types.Bool `tfsdk:"is_maker"`
-	IsChecker                            types.Bool `tfsdk:"is_checker"`
-	CanCreateUsers                       types.Bool `tfsdk:"can_create_users"`
-	CanUpdateUsers                       types.Bool `tfsdk:"can_update_users"`
-	CanAccessHelpDesk                    types.Bool `tfsdk:"can_access_help_desk"`
-	CanSeeFullAuditLog                   types.Bool `tfsdk:"can_see_full_audit_log"`
-	CanManageAdministrators              types.Bool `tfsdk:"can_manage_administrators"`
-	CanManageApplications                types.Bool `tfsdk:"can_manage_applications"`
-	CanManageSharedFolders               types.Bool `tfsdk:"can_manage_shared_folders"`
-	CanManageBusinessUnits               types.Bool `tfsdk:"can_manage_business_units"`
-	CanManageRouteTemplates              types.Bool `tfsdk:"can_manage_route_templates"`
-	CanManageExternalScriptStep          types.Bool `tfsdk:"can_manage_external_script_step"`
-	CanManageExternalScriptRootExecution types.Bool `tfsdk:"can_manage_external_script_root_execution"`
-	CanManageLoginRestrictionPolicies    types.Bool `tfsdk:"can_manage_login_restriction_policies"`
-	CanManageIcapSettings                types.Bool `tfsdk:"can_manage_icap_settings"`
+	// if len(icapServers) > 0 {
+	bodyData.EnabledIcapServers = icapServers
+	// }
+
+	var bandwidthData BuBandwidthLimitsModel
+	diags = data.BandwidthLimits.As(ctx, &bandwidthData, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.BandwidthLimits.Policy = bandwidthData.Policy.ValueString()
+	bodyData.BandwidthLimits.ModifyLimitsAllowed = bandwidthData.ModifyLimitsAllowed.ValueBool()
+	bodyData.BandwidthLimits.InboundLimit = bandwidthData.InboundLimit.ValueInt32()
+	bodyData.BandwidthLimits.OutboundLimit = bandwidthData.OutboundLimit.ValueInt32()
+
+	var htmlSettings BuHtmlTemplateSettingsModel
+
+	diags = data.HtmlTemplateSettings.As(ctx, &htmlSettings, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.HtmlTemplateSettings.HtmlTemplateFolderPath = htmlSettings.HtmlTemplateFolderPath.ValueString()
+	bodyData.HtmlTemplateSettings.IsAllowedForModifying = htmlSettings.IsAllowedForModifying.ValueBool()
+
+	var transferAPISettings BuTransferAPISettingsModel
+
+	diags = data.TransfersApiSettings.As(ctx, &transferAPISettings, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.TransfersApiSettings.TransfersWebServiceAllowed = transferAPISettings.TransfersWebServiceAllowed.ValueBool()
+	bodyData.TransfersApiSettings.IsWebServiceRightsModifyingAllowed = transferAPISettings.IsWebServiceRightsModifyingAllowed.ValueBool()
+
+	var adhocSettings BuAdHocSettingsModel
+
+	diags = data.AdHocSettings.As(ctx, &adhocSettings, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.AdHocSettings.AuthByEmail = adhocSettings.AuthByEmail.ValueBool()
+	bodyData.AdHocSettings.AuthByEmailModifyingAllowed = adhocSettings.AuthByEmailModifyingAllowed.ValueBool()
+	bodyData.AdHocSettings.DeliveryMethodModifyingAllowed = adhocSettings.DeliveryMethodModifyingAllowed.ValueBool()
+	bodyData.AdHocSettings.DeliveryMethod = adhocSettings.DeliveryMethod.ValueString()
+	bodyData.AdHocSettings.ImplicitEnrollmentType = adhocSettings.ImplicitEnrollmentType.ValueString()
+	bodyData.AdHocSettings.EnrollmentTemplate = adhocSettings.EnrollmentTemplate.ValueString()
+	bodyData.AdHocSettings.NotificationTemplate = adhocSettings.NotificationTemplate.ValueString()
+
+	var enrlTypes []string
+	diags = adhocSettings.EnrollmentTypes.ElementsAs(ctx, &enrlTypes, false)
+	if diags.HasError() {
+		return
+	}
+	bodyData.AdHocSettings.EnrollmentTypes = enrlTypes
+
+	var fileArchiveSettings BuFileArchiveSettingsModel
+
+	diags = data.FileArchivingSettings.As(ctx, &fileArchiveSettings, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.FileArchivingSettings.Policy = fileArchiveSettings.Policy.ValueString()
+	bodyData.FileArchivingSettings.FolderPolicy = fileArchiveSettings.FolderPolicy.ValueString()
+	bodyData.FileArchivingSettings.EncryptionCertificatePolicy = fileArchiveSettings.EncryptionCertificatePolicy.ValueString()
+	bodyData.FileArchivingSettings.CustomFileSizePolicy = fileArchiveSettings.CustomFileSizePolicy.ValueString()
+	bodyData.FileArchivingSettings.CustomFileSize = fileArchiveSettings.CustomFileSize.ValueInt32()
+	bodyData.FileArchivingSettings.PolicyModifyingAllowed = fileArchiveSettings.PolicyModifyingAllowed.ValueBool()
+	bodyData.FileArchivingSettings.CustomFolder = fileArchiveSettings.CustomFolder.ValueString()
+	bodyData.FileArchivingSettings.CustomEncryptionCertificate = fileArchiveSettings.CustomEncryptionCertificate.ValueString()
+
+	var loginRestrictions BuLoginRestrictionSettingsModel
+
+	diags = data.LoginRestrictionSettings.As(ctx, &loginRestrictions, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return
+	}
+
+	bodyData.LoginRestrictionSettings.Policy = loginRestrictions.Policy.ValueString()
+	bodyData.LoginRestrictionSettings.IsPolicyModifyingAllowed = loginRestrictions.IsPolicyModifyingAllowed.ValueBool()
+
+	return
 }
