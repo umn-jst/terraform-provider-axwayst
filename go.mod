@@ -1,6 +1,7 @@
 module github.com/umn-jst/terraform-provider-axwayst
 
-go 1.22.7
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
