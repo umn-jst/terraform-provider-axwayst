@@ -52,7 +52,7 @@ resource "axwayst_business_units" "example-complex" {
     notification_template             = "exampleNotificationFile.xhtml"
   }
 
-  enabled_icap_servers = ["symantecav.example"]
+  enabled_icap_servers = ["exampe-icap"]
 
   additional_attributes = {
     "userVars.example_addt_atrbt2"  = "201",
