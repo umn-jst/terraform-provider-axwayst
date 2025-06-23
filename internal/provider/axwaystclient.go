@@ -39,7 +39,8 @@ func (c *AxwaySTClient) GenericAPIRequest(ctx context.Context, method, url strin
 		return
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
-	httpReq.Header.Add("Authorization", c.auth)
+	httpReq.Header.Add("Referer", "terraform")
+	// httpReq.Header.Add("Authorization", c.auth)
 
 	httpResp, err := c.client.Do(httpReq)
 	if err != nil {
