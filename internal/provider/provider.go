@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"time"
 
@@ -121,8 +122,16 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 	encodedAuth := base64.StdEncoding.EncodeToString([]byte(authString))
 	auth = "Basic" + " " + encodedAuth
 
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Provider Configuration Error",
+			"Unable to create cookie jar to store Axway token.")
+	}
+
 	httpclient := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 120 * time.Second,
+		Jar:     jar,
 	}
 
 	client := new(AxwaySTClient)
@@ -130,6 +139,26 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 	client.client = httpclient
 	client.endpoint = endpoint
 	client.auth = auth
+	myself_url := endpoint + "/api/v2.0/myself"
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", myself_url, nil)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Provider Configuration Error",
+			"Unable to generate http request to myself endpoint to generate token.")
+	}
+
+	httpReq.Header.Add("Content-Type", "application/json")
+	httpReq.Header.Add("Referer", "terraform")
+	httpReq.Header.Add("Authorization", auth)
+
+	_, err = client.client.Do(httpReq)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Provider Configuration Error",
+			"Unable to authenticate to myself endpoint to generate token.")
+	}
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
