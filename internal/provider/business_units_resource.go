@@ -433,7 +433,7 @@ func (r *BusinessUnitsResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	url := "/api/v2.0/businessUnits/"
-	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
+	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error making API http request",
@@ -658,7 +658,7 @@ func (r *BusinessUnitsResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	url := fmt.Sprintf("/api/v2.0/businessUnits/%s/", data.Name.ValueString())
-	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
+	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error making API update request",
