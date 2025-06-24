@@ -290,7 +290,7 @@ func (r *AdministratorsResource) Create(ctx context.Context, req resource.Create
 	}
 
 	url := "/api/v2.0/administrators/"
-	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
+	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodPost, url, bodyData, []int{201})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error making API http request",
@@ -406,7 +406,7 @@ func (r *AdministratorsResource) Update(ctx context.Context, req resource.Update
 	}
 
 	url := fmt.Sprintf("/api/v2.0/administrators/%s/", data.LoginName.ValueString())
-	_, err := r.client.CreateUpdateAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
+	_, _, err := r.client.GenericAPIRequest(ctx, http.MethodPut, url, bodyData, []int{204})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error making API update request",

@@ -131,12 +131,17 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	httpclient := &http.Client{
 		Timeout: 120 * time.Second,
+	}
+
+	jarhttpclient := &http.Client{
+		Timeout: 120 * time.Second,
 		Jar:     jar,
 	}
 
 	client := new(AxwaySTClient)
 
 	client.client = httpclient
+	client.jarclient = jarhttpclient
 	client.endpoint = endpoint
 	client.auth = auth
 	myself_url := endpoint + "/api/v2.0/myself"
@@ -152,7 +157,7 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 	httpReq.Header.Add("Referer", "terraform")
 	httpReq.Header.Add("Authorization", auth)
 
-	_, err = client.client.Do(httpReq)
+	_, err = client.jarclient.Do(httpReq)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
