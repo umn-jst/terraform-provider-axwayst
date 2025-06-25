@@ -138,7 +138,7 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	client.jarclient = jarhttpclient
 	client.endpoint = endpoint
-	// client.auth = auth
+
 	myself_url := endpoint + "/api/v2.0/myself"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", myself_url, nil)
 
