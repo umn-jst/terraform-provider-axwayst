@@ -129,10 +129,6 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 			"Unable to create cookie jar to store Axway token.")
 	}
 
-	httpclient := &http.Client{
-		Timeout: 120 * time.Second,
-	}
-
 	jarhttpclient := &http.Client{
 		Timeout: 120 * time.Second,
 		Jar:     jar,
@@ -140,10 +136,9 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	client := new(AxwaySTClient)
 
-	client.client = httpclient
 	client.jarclient = jarhttpclient
 	client.endpoint = endpoint
-	client.auth = auth
+
 	myself_url := endpoint + "/api/v2.0/myself"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", myself_url, nil)
 
@@ -157,13 +152,15 @@ func (p *axwaystProvider) Configure(ctx context.Context, req provider.ConfigureR
 	httpReq.Header.Add("Referer", "terraform")
 	httpReq.Header.Add("Authorization", auth)
 
-	_, err = client.jarclient.Do(httpReq)
+	loginResponse, err := client.jarclient.Do(httpReq)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Provider Configuration Error",
 			"Unable to authenticate to myself endpoint to generate token.")
 	}
+
+	client.csrfToken = loginResponse.Header.Get("csrfToken")
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
